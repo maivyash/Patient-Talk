@@ -33,6 +33,11 @@ const HOSPITAL_DETAILS_Schema = new mongoose.Schema(
       minlength: 6,
       select: false,
     },
+    User_role: {
+      type: boolean,
+      required: true,
+      select: true,
+    },
 
     hospital_logo: {
       data: {

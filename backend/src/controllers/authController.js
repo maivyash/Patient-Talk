@@ -112,6 +112,7 @@ async function signup(req, res, next) {
       hospital_name,
       hospital_email,
       hospital_phno,
+      User_role:false,
       hospital_password: hashedPassword,
       hospital_logo: {
         data: logoBuffer,
@@ -172,7 +173,7 @@ async function login(req, res, next) {
     }
 
     const hospital = await HOSPITAL_DETAILS.findOne({ hospital_email }).select(
-      "+hospital_password"
+      "+hospital_password +User_role"
     );
 
     if (!hospital) {
@@ -181,6 +182,7 @@ async function login(req, res, next) {
         message: "Invalid email or password",
       });
     }
+
 
     const isMatch = await bcrypt.compare(
       hospital_password,
@@ -191,6 +193,14 @@ async function login(req, res, next) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
+      });
+    }
+    
+
+    if (hospital.User_role === false) {
+      return res.status(401).json({
+        success: false,
+        message: "You are not authorized to access this resource",
       });
     }
 
