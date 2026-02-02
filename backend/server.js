@@ -6,6 +6,9 @@ require("dotenv").config();
 const { connectDB } = require("./src/config/db");
 const authRoutes = require("./src/routes/authRoutes");
 const logoRoutes = require("./src/routes/logoRoutes");
+const feedbackCreateRoutes = require("./src/routes/feedback.routes");
+const feedbackGetRoutes = require("./src/routes/feedback");
+const hospitalFeedbackRoutes = require("./src/routes/hospitalfeedback");
 const { notFoundHandler, errorHandler } = require("./src/middleware/errorHandler");
 
 const app = express();
@@ -20,6 +23,9 @@ app.get("/health", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/logo", logoRoutes);
+app.use("/api", feedbackCreateRoutes);
+app.use("/api", feedbackGetRoutes);
+app.use("/api", hospitalFeedbackRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

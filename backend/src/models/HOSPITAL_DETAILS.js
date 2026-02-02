@@ -34,7 +34,7 @@ const HOSPITAL_DETAILS_Schema = new mongoose.Schema(
       select: false,
     },
     User_role: {
-      type: boolean,
+      type: Boolean,
       required: true,
       select: true,
     },
