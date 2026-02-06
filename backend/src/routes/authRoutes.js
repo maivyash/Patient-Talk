@@ -1,5 +1,5 @@
 const express = require("express");
-const { signup, login } = require("../controllers/authController");
+const { signup, login, superadminLogin } = require("../controllers/authController");
 
 const router = express.Router();
 
@@ -8,6 +8,10 @@ router.post("/signup", signup);
 
 // Login using email and password
 router.post("/login", login);
+
+//super admin login 
+router.post("/superadmin/login",superadminLogin);
+
 
 module.exports = router;
 

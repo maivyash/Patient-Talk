@@ -1,54 +1,30 @@
-import { useNavigate } from 'react-router-dom'
+import React from "react";
+import "./Home.css";
+const logo = "../src/assets/qr_imave.png";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
   return (
-    <div className="screen screen--centered">
-      <header className="header">
-        <div className="brand">
-          <span className="brand-text">Patienttalkback.com</span>
-        </div>
-      </header>
+    <div className="role-page">
+      <h1 className="brand">Patienttalkback.com</h1>
 
-      <main className="panel panel--narrow panel--logo">
-        <div className="logo-hero">
-          <div className="logo-symbol" />
-          <div className="logo-hospital-name">BOSTON MEMORIAL HOSPITAL</div>
+      <div className="star">★</div>
+
+      <div className="role-card">
+        <button className="role-btn" onClick={() => navigate("/admin/login")}>HOSPITAL ADMIN</button>
+
+        <div className="divider">
+          <span></span>
+          <p>OR</p>
+          <span></span>
         </div>
 
-        <div className="button-stack button-stack--spaced">
-          <button
-            type="button"
-            className="btn btn--primary btn--full"
-            onClick={() => navigate('/super-admin/login')}
-          >
-            Super Admin Login
-          </button>
-          <button
-            type="button"
-            className="btn btn--secondary btn--full"
-            onClick={() => navigate('/admin/login')}
-          >
-            Admin Login
-          </button>
-          <button
-            type="button"
-            className="btn btn--primary-outline btn--full"
-            onClick={() => navigate('/hospital/login')}
-          >
-            Hospital Login
-          </button>
-          <button
-            type="button"
-            className="btn btn--secondary btn--full"
-            onClick={() => navigate('/user/login')}
-          >
-            User Login
-          </button>
-        </div>
-      </main>
+        <button className="role-btn scanner" onClick={()=>{navigate("/use/scanQR")}}>
+          <span>SCANNER</span>
+          <div className="qr-box"><img src={logo} alt="QR Code" srcset="" /></div>
+        </button>
+      </div>
     </div>
-  )
+  );
 }
-

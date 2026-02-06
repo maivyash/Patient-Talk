@@ -25,24 +25,25 @@ function App() {
     <div className="app-root">
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/hospital/:hospitalId" element={<HospitalLanding />} />
+        {/* <Route path="/hospital/:hospitalId" element={<HospitalLanding />} />
         <Route path="/hospital/:hospitalId/feedback" element={<FeedbackForm />} />
         <Route path="/super-admin/login" element={<SuperAdminLogin />} />
-        <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+        
         <Route path="/super-admin/hospital/:hospitalId/complaints" element={<SuperAdminComplaintBoard />} />
-        <Route path="/super-admin/hospital/:hospitalId/complaints/:categoryId" element={<SuperAdminComplaintList />} />
+        <Route path="/super-admin/hospital/:hospitalId/complaints/:categoryId" element={<SuperAdminComplaintList />} /> */}
+        <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/hospital/login" element={<HospitalLogin />} />
-        <Route path="/user/login" element={<UserLogin />} />
+        {/* <Route path="/hospital/login" element={<HospitalLogin />} /> */}
+        {/* <Route path="/user/login" element={<UserLogin />} /> */}
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/complaints" element={<ComplaintBoard />} />
+         {/*<Route path="/complaints" element={<ComplaintBoard />} />
         <Route path="/complaints/new" element={<ComplaintBuilder />} />
         <Route path="/complaints/:categoryId" element={<ComplaintForm />} />
         <Route path="/complaints/:categoryId/view/:complaintId" element={<ComplaintView />} />
         <Route path="/user/feedback/:categoryId" element={<UserFeedbackForm />} />
         <Route path="/admin/responses" element={<AdminResponses />} />
-        <Route path="/theme" element={<ThemeSettings />} />
+        <Route path="/theme" element={<ThemeSettings />} /> */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

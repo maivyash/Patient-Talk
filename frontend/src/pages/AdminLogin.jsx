@@ -1,99 +1,166 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from "react";
+import "./Admin_Login.css";
+import { useNavigate } from "react-router-dom";
 
-export default function AdminLogin() {
-  const navigate = useNavigate()
-  const [credentials, setCredentials] = useState({
-    email: '',
-    password: '',
-    isSuperAdmin: false,
-  })
+const BACKENDURL = import.meta.env.VITE_BACKENDURL;
+
+export default function Login() {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    hospital_email: "",
+    hospital_password: "",
+    superAdmin: false,
+  });
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-    setCredentials((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
-  }
+    const { name, value, type, checked } = e.target;
+    setForm({
+      ...form,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // TODO: hook with backend auth route
-    navigate('/complaints')
-  }
+  const handleSubmit = async () => {
+    if (!form.hospital_email || !form.hospital_password) {
+      setError("Email and password are required");
+      return;
+    }
+    setError("");
+    setLoading(true);
+
+
+if (!form.superAdmin) {
+    try {
+      const res = await fetch(`${BACKENDURL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",                                  //allow cookie
+        body: JSON.stringify({
+          hospital_email: form.hospital_email,
+          hospital_password: form.hospital_password,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.status === 401) {
+        setError(data.message || "Invalid credentials");
+        throw new Error(data.message || "Invalid credentials");
+      }
+      if (res.status !== 200) {
+        throw new Error(data.message || "Login failed");
+      }
+      if (!data.token) {
+        setError("Server ERROR 505");
+        throw new Error("No token received");
+      }
+      if(res.status === 200){
+        navigate("/admin/dashboard");
+      }
+                                                              // ✅ JWT is now stored in HttpOnly cookie
+      
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }else{
+    try {
+      const res = await fetch(`${BACKENDURL}/api/auth/superadmin/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",                                  //allow cookie
+        body: JSON.stringify({
+          hospital_email: form.hospital_email,
+          hospital_password: form.hospital_password,
+        }),
+      });
+      setLoading(false);
+      if (res.status === 401) {
+        const data = await res.json();
+        setError(data.message || "Invalid credentials");
+        throw new Error(data.message || "Invalid credentials");
+      }
+      if (res.status !== 200) {
+        const data = await res.json();
+        throw new Error(data.message || "Login failed");
+      }
+      const data = await res.json();
+      if (!data.token) {
+        setError("Server ERROR 505");
+        throw new Error("No token received");
+      }
+      if(res.status === 200){
+        navigate("/superadmin/dashboard");
+      }
+      
+    return;
+  } catch (err) {
+    setError(err.message);
+  } finally {    setLoading(false);}
+}
+  };
 
   return (
-    <div className="screen screen--centered">
-      <header className="header">
-        <div className="brand">
-          <span className="brand-mark" />
-          <span className="brand-text">Patienttalkback.com</span>
+    <div className="login-page">
+      <h1 className="brand">Patienttalkback.com</h1>
+      <div className="star">★</div>
+
+      <div className="login-card">
+        <label>Email</label>
+        <input
+          type="email"
+          name="hospital_email"
+          placeholder="Email"
+          value={form.hospital_email}
+          onChange={handleChange}
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          name="hospital_password"
+          placeholder="Password"
+          value={form.hospital_password}
+          onChange={handleChange}
+        />
+
+        <div className="options">
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              name="superAdmin"
+              checked={form.superAdmin}
+              onChange={handleChange}
+            />
+            <span>Super Admin</span>
+          </label>
+
+          <span
+            className="register"
+            onClick={() => navigate("/admin/register")}
+          >
+            new here? Register
+          </span>
         </div>
-      </header>
 
-      <main className="panel panel--narrow">
-        <h1 className="panel-title">Admin</h1>
+        {error && <p className="error">{error}</p>}
 
-        <form className="form" onSubmit={handleSubmit}>
-          <div className="form-row">
-            <label className="form-label">
-              Email
-              <input
-                required
-                type="email"
-                name="email"
-                className="input"
-                value={credentials.email}
-                onChange={handleChange}
-              />
-            </label>
-          </div>
-          <div className="form-row">
-            <label className="form-label">
-              Password
-              <input
-                required
-                type="password"
-                name="password"
-                className="input"
-                value={credentials.password}
-                onChange={handleChange}
-              />
-            </label>
-          </div>
-
-          <div className="form-row form-row--inline">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="isSuperAdmin"
-                checked={credentials.isSuperAdmin}
-                onChange={handleChange}
-              />
-              <span>Super Admin</span>
-            </label>
-          </div>
-
-          <div className="form-row form-row--inline form-row--space-between">
-            <button
-              type="button"
-              className="link-button"
-              onClick={() => navigate('/admin/register')}
-            >
-              new here? Register
-            </button>
-          </div>
-
-          <div className="form-actions">
-            <button type="submit" className="btn btn--primary btn--full">
-              Login
-            </button>
-          </div>
-        </form>
-      </main>
+        <button
+          className="login-btn"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </div>
     </div>
-  )
+  );
 }
-
-

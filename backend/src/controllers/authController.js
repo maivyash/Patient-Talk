@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const HOSPITAL_DETAILS = require("../models/HOSPITAL_DETAILS");
+const SUPER_ADMIN = require("../models/SUPER_ADMIN");
 const { signToken } = require("../helpers/jwt");
 const { logLogin, logRegistration } = require("../helpers/logger");
 
@@ -47,7 +48,7 @@ async function signup(req, res, next) {
       !hospital_password ||
       !hospital_logo
     ) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message:
           "All fields are required: hospital_name, hospital_email, hospital_phno, hospital_password, hospital_logo (base64 string)",
@@ -55,21 +56,21 @@ async function signup(req, res, next) {
     }
 
     if (!validateName(hospital_name)) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid hospital_name: must be 2-120 characters",
       });
     }
 
     if (!validateEmail(hospital_email)) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid hospital_email format",
       });
     }
 
     if (!validatePhone(hospital_phno)) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message:
           "Invalid hospital_phno: must be 7-20 digits, optionally starting with +",
@@ -77,7 +78,7 @@ async function signup(req, res, next) {
     }
 
     if (!validatePassword(hospital_password)) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid hospital_password: must be at least 6 characters",
       });
@@ -100,7 +101,7 @@ async function signup(req, res, next) {
         throw new Error("Invalid logo data");
       }
     } catch (e) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid hospital_logo: must be a base64-encoded image string",
       });
@@ -130,6 +131,14 @@ async function signup(req, res, next) {
       hospital_email: hospital.hospital_email,
       hospital_name: hospital.hospital_name,
     });
+res.cookie("token", token, {
+  httpOnly: true,      // 🔐 secure from XSS
+  secure: false,       // ❗ localhost only (true in prod)
+  sameSite: "lax",     // works with localhost
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+});
+
+
 
     return res.status(201).json({
       success: true,
@@ -159,14 +168,14 @@ async function login(req, res, next) {
     const { hospital_email, hospital_password } = req.body || {};
 
     if (!hospital_email || !hospital_password) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "hospital_email and hospital_password are required",
       });
     }
 
     if (!validateEmail(hospital_email)) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid hospital_email format",
       });
@@ -197,13 +206,7 @@ async function login(req, res, next) {
     }
     
 
-    if (hospital.User_role === false) {
-      return res.status(401).json({
-        success: false,
-        message: "You are not authorized to access this resource",
-      });
-    }
-
+  
     const token = signToken({
       id: hospital._id.toString(),
       email: hospital.hospital_email,
@@ -213,8 +216,13 @@ async function login(req, res, next) {
       hospitalId: hospital._id.toString(),
       hospital_email: hospital.hospital_email,
     });
-
-    return res.json({
+res.cookie("token", token, {
+  httpOnly: true,      // 🔐 secure from XSS
+  secure: false,       // ❗ localhost only (true in prod)
+  sameSite: "lax",     // works with localhost
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+});
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
@@ -231,8 +239,72 @@ async function login(req, res, next) {
   }
 }
 
+
+async function superadminLogin(req, res, next) {
+    try {
+    const { hospital_email, hospital_password } = req.body || {};
+
+    if (!hospital_email || !hospital_password) {
+      return res.status(401).json({
+        success: false,
+        message: "SUPER ADMIN email and SUPER ADMIN assword are required",
+      });
+    }
+
+    if (!validateEmail(hospital_email)) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid SUPER ADMIN email ",
+      });
+
+    }
+    //FINDING SUPER ADMIN IN DB
+  const ADMIN = await SUPER_ADMIN.findOne({
+  email: hospital_email,
+}).select("+pass");
+
+    //if nom user is present
+    if (!ADMIN) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+    if(ADMIN.pass != hospital_password){
+      return res.status(401).json({
+        success: false,
+        message: `${ADMIN.pass} ${hospital_password} Invalid email or password`,
+      });
+    }
+    if(ADMIN.pass === hospital_password){
+      const token = signToken({
+        id: ADMIN._id.toString(),
+        email: ADMIN.hospital_email,
+      });
+      res.cookie("token", token, {
+  httpOnly: true,      // 🔐 secure from XSS
+  secure: false,       // ❗ localhost only (true in prod)
+  sameSite: "lax",     // works with localhost
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+});
+      return res.status(200).json({
+        success: true,
+        message: "Super Admin login successful",
+        token,
+      });
+    }
+  } catch (err) {
+    return next(err); 
+  }finally {
+    
+    return;
+  }
+
+}
+
 module.exports = {
   signup,
   login,
+  superadminLogin
 };
 

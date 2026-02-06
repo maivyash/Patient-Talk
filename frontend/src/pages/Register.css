@@ -1,0 +1,106 @@
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.register-page {
+  min-height: 100vh;
+  background: #9ed6df;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.brand {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.star {
+  font-size: 28px;
+  color: gold;
+  margin-bottom: 18px;
+}
+
+.register-card {
+  background: #fff;
+  width: 100%;
+  max-width: 400px;
+  padding: 26px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.register-card label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.register-card input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+.register-card input:focus {
+  border-color: #333;
+}
+
+/* Custom file upload */
+.file-input {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.file-input input {
+  display: none;
+}
+
+.file-input label {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #777;
+  font-size: 14px;
+}
+
+.file-input label:hover {
+  border-color: #333;
+}
+
+.register-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #222;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.register-btn:hover {
+  background: #000;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .brand {
+    font-size: 22px;
+  }
+
+  .register-card {
+    padding: 20px;
+  }
+}
