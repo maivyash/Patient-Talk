@@ -1,0 +1,44 @@
+.create-feedback-page {
+  background: #9ed6df;
+  min-height: 100vh;
+  padding: 20px;
+  text-align: center;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.upload-btn {
+  display: block;
+  background: #5a9ea6;
+  padding: 10px;
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+.btn {
+  background: #5a9ea6;
+  color: #000;
+  padding: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.submit-btn {
+  margin-top: 40px;
+  background: #4b8d94;
+  color: #fff;
+  padding: 12px;
+  width: 100%;
+}
+
+.question-item {
+  background: #fff;
+  margin-top: 8px;
+  padding: 8px;
+  display: flex;
+  justify-content: space-between;
+}

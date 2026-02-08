@@ -12,7 +12,7 @@ export default function Home() {
       <div className="star">★</div>
 
       <div className="role-card">
-        <button className="role-btn" onClick={() => navigate("/admin/login")}>HOSPITAL ADMIN</button>
+        <button className="role-btn" onClick={() => navigate("/login")}>HOSPITAL ADMIN</button>
 
         <div className="divider">
           <span></span>

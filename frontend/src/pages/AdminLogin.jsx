@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./Admin_Login.css";
-import { useNavigate } from "react-router-dom";
+import { replace, useNavigate } from "react-router-dom";
 
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
@@ -60,7 +60,7 @@ if (!form.superAdmin) {
         throw new Error("No token received");
       }
       if(res.status === 200){
-        navigate("/admin/dashboard");
+        navigate("/admin/dashboard", { replace: true });
       }
                                                               // ✅ JWT is now stored in HttpOnly cookie
       
@@ -98,7 +98,7 @@ if (!form.superAdmin) {
         throw new Error("No token received");
       }
       if(res.status === 200){
-        navigate("/superadmin/dashboard");
+        navigate("/superadmin/dashboard", { replace: true });
       }
       
     return;

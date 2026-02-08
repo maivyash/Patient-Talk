@@ -6,10 +6,11 @@ require("dotenv").config();
 const { connectDB } = require("./src/config/db");
 const authRoutes = require("./src/routes/authRoutes");
 const logoRoutes = require("./src/routes/logoRoutes");
-const feedbackCreateRoutes = require("./src/routes/feedback.routes");
-const feedbackGetRoutes = require("./src/routes/feedback");
-const hospitalFeedbackRoutes = require("./src/routes/hospitalfeedback");
+
+
+const adminRoutes = require("./src/routes/adminRoutes");
 const { notFoundHandler, errorHandler } = require("./src/middleware/errorHandler");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
@@ -23,16 +24,15 @@ app.use(
 
 app.use(express.json({ limit: "10mb" }));
 app.use(morgan("dev"));
-
+app.use(cookieParser()); // coookie parser for JWT in cookies
 app.get("/health", (req, res) => {
   res.json({ ok: true, service: "backend", timestamp: new Date().toISOString() });
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/logo", logoRoutes);
-app.use("/api", feedbackCreateRoutes);
-app.use("/api", feedbackGetRoutes);
-app.use("/api", hospitalFeedbackRoutes);
+
 
 app.use(notFoundHandler);
 app.use(errorHandler);

@@ -19,6 +19,8 @@ import UserFeedbackForm from './pages/UserFeedbackForm'
 import SuperAdminDashboard from './pages/SuperAdminDashboard'
 import SuperAdminComplaintBoard from './pages/SuperAdminComplaintBoard'
 import SuperAdminComplaintList from './pages/SuperAdminComplaintList'
+import CreateFeedback from './CreateFeeback'
+import EditFeedback from './pages/EditFeedbackForm'
 
 function App() {
   return (
@@ -32,11 +34,14 @@ function App() {
         <Route path="/super-admin/hospital/:hospitalId/complaints" element={<SuperAdminComplaintBoard />} />
         <Route path="/super-admin/hospital/:hospitalId/complaints/:categoryId" element={<SuperAdminComplaintList />} /> */}
         <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/login" element={<AdminLogin />} />
         {/* <Route path="/hospital/login" element={<HospitalLogin />} /> */}
         {/* <Route path="/user/login" element={<UserLogin />} /> */}
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/createFeedback" element={<CreateFeedback/>}/>
+
+        <Route path='admin/feedback/edit/:id' element={<EditFeedback />} />
          {/*<Route path="/complaints" element={<ComplaintBoard />} />
         <Route path="/complaints/new" element={<ComplaintBuilder />} />
         <Route path="/complaints/:categoryId" element={<ComplaintForm />} />
