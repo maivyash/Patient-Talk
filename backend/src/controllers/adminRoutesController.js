@@ -3,6 +3,9 @@ const mongoose = require("mongoose");
 const FEEDBACK = require("../models/feedback");
 const { get } = require("mongoose");
 const HOSPITAL_DETAILS = require("../models/HOSPITAL_DETAILS");
+const { generateFeedbackQR } = require("../helpers/QRgenerator");
+
+
 
 
  async function getFeedbacksByHospital(req, res) {
@@ -116,8 +119,8 @@ async function createFeedback(req, res) {
   }
 }
 
-async function getFeedbackById(req, res) { // GET /admin/getfeedbackform/:id
-                                           //get feedback by Feedback ID and hospital ID, return 404 if not found
+async function getFeedbackById(req, res) {    // GET /admin/getfeedbackform/:id
+                                              //get feedback by Feedback ID and hospital ID, return 404 if not found
   const feedback = await FEEDBACK.findOne({
     _id: req.params.id,
     hospitalId: req.hospitalId,
@@ -155,4 +158,23 @@ try{  await FEEDBACK.deleteOne(
 }catch(err){
   res.status(500).json({ success: false, message: "Error deleting feedback" });
 }}
-module.exports = { getFeedbacksByHospital, getHospitalProfile, changeHospitalName, createFeedback, getFeedbackById,updateFeedbackById,deleteFeedbackById };
+
+
+ async function getFeedbackQR(req, res) {
+    const feedback = await FEEDBACK.findOne({
+      _id: req.params.id,
+      hospitalId: req.hospitalId,
+    });
+
+    if (!feedback) {
+      return res.status(404).json({ message: "Feedback not found" });
+    }
+
+    const { qrBase64 } = await generateFeedbackQR(feedback._id);
+
+    res.status(200).json({
+      success: true,
+      qr: qrBase64,
+    });
+  }
+module.exports = { getFeedbacksByHospital, getHospitalProfile, changeHospitalName, createFeedback, getFeedbackById,updateFeedbackById,deleteFeedbackById, getFeedbackQR };

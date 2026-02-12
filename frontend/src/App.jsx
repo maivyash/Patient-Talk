@@ -21,6 +21,7 @@ import SuperAdminComplaintBoard from './pages/SuperAdminComplaintBoard'
 import SuperAdminComplaintList from './pages/SuperAdminComplaintList'
 import CreateFeedback from './CreateFeeback'
 import EditFeedback from './pages/EditFeedbackForm'
+import PublicFeedbackForm from './SubmitFeedbackResponce'
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/createFeedback" element={<CreateFeedback/>}/>
+        <Route path="/feedback/:id" element={<PublicFeedbackForm />} />
 
         <Route path='admin/feedback/edit/:id' element={<EditFeedback />} />
          {/*<Route path="/complaints" element={<ComplaintBoard />} />

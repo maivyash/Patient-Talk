@@ -6,6 +6,7 @@ require("dotenv").config();
 const { connectDB } = require("./src/config/db");
 const authRoutes = require("./src/routes/authRoutes");
 const logoRoutes = require("./src/routes/logoRoutes");
+const UserRouter = require("./src/routes/userRoutes");
 
 
 const adminRoutes = require("./src/routes/adminRoutes");
@@ -32,6 +33,8 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/logo", logoRoutes);
+app.use("/api/user", UserRouter);
+
 
 
 app.use(notFoundHandler);

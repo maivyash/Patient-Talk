@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./EditFeedback.css";
 import { useNavigate, useParams } from "react-router-dom";
 
+
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 export default function EditFeedback() {
@@ -55,6 +56,7 @@ export default function EditFeedback() {
 
     const res = await fetch(`${BACKENDURL}/api/admin/updatefeedbackform/${id}`, {
       method: "PUT",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
@@ -62,9 +64,22 @@ export default function EditFeedback() {
         isActive,
       }),
     });
+    if (!res.ok) {
+const data = await res.json();
+return alert(data.message || "Update failed");
+navigate("/admin/dashboard",{ replace: true });
+    }
+    if (res.status === 412) {
+const data = await res.json();
+return alert(data.message || "Invalid or expired token");
+navigate("/login",{ replace: true });
+      
+    }
 
-    if (res.ok) {
+    if (res.status === 200) {
       alert("Feedback updated");
+      navigate("/admin/dashboard",{ replace: true });
+
     } else {
       alert("Update failed");
     }
@@ -81,6 +96,40 @@ export default function EditFeedback() {
     navigate("/admin/dashboard");
   };
 
+  const downloadQR = async () => {
+  const res = await fetch(
+    `${BACKENDURL}/api/admin/feedback/${id}/qr`,
+    { credentials: "include" }
+  );
+  console.log("DOWNLOADED");
+  
+  
+  if(res.status === 412){
+    const data = await res.json();
+    alert(data.message || "Invalid or expired token");
+    return navigate("/login",{ replace: true });
+  }
+
+  if (res.status !== 200) {
+    const data = await res.json();
+    return alert(data.message || "Failed to generate QR code");
+  }
+  if (!res.ok) {
+    const data = await res.json();
+    return alert(data.message || "Failed to generate QR code");
+  }
+  if (res.status === 200) {
+      const data = await res.json();
+
+  const link = document.createElement("a");
+  link.href = data.qr;
+  link.download = "feedback-qr.png";
+  link.click();
+  }
+
+};
+
+
   if (loading) return <p className="center">Loading...</p>;
 
   return (
@@ -91,7 +140,7 @@ export default function EditFeedback() {
       {/* EXISTING QUESTIONS */}
       {questions.map((q, i) => (
         <div key={i} className="question-row">
-          <span>{`QUESTION ${i + 1} (ALREADY IN FORM)`}</span>
+          <span>{`${q.text} \t \t(ALREADY IN FORM)`}</span>
           <button onClick={() => removeQuestion(i)}>🗑</button>
         </div>
       ))}
@@ -138,7 +187,7 @@ export default function EditFeedback() {
         SAVE CHANGES
       </button>
 
-      <button className="secondary">
+      <button className="secondary" onClick={downloadQR}>
         DOWNLOAD FEEDBACK QR
       </button>
     </div>

@@ -66,4 +66,7 @@ const feedbackSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("FEEDBACK", feedbackSchema);
+module.exports =
+  mongoose.models.FEEDBACK ||
+  mongoose.model("FEEDBACK", feedbackSchema);
+
