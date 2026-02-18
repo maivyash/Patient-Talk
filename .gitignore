@@ -4,6 +4,18 @@
 # Dependency directories
 node_modules/
 
+
+??UPLOADS 
+uploads/
+.uploads/
+/uploads/
+/uploads/*
+uploads/**/*
+*/uploads
+**/*/uploads
+uploads/*/*
+
+
 # OS specific files
 .DS_Store
 Thumbs.db
@@ -21,6 +33,7 @@ Thumbs.db
 .env.test.local
 .env.production.local
 *.pem
+
 
 # ---------------------------------
 # Backend (Node.js)

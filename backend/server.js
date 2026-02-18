@@ -13,7 +13,11 @@ const adminRoutes = require("./src/routes/adminRoutes");
 const { notFoundHandler, errorHandler } = require("./src/middleware/errorHandler");
 const cookieParser = require("cookie-parser");
 
+
 const app = express();
+const path = require("path");
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 app.use(

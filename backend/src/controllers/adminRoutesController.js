@@ -4,11 +4,12 @@ const FEEDBACK = require("../models/feedback");
 const { get } = require("mongoose");
 const HOSPITAL_DETAILS = require("../models/HOSPITAL_DETAILS");
 const { generateFeedbackQR } = require("../helpers/QRgenerator");
+const FEEDBACK_RESPONSE = require("../models/FeedbackResponses");
 
 
 
 
- async function getFeedbacksByHospital(req, res) {
+async function getFeedbacksByHospital(req, res) {
   try {
     const feedbacks = await FEEDBACK.find({
       hospitalId: req.hospitalId,
@@ -33,7 +34,7 @@ async function getHospitalProfile(req, res) {
     }
     if (!hospitalProfile.hospital_name) {
       hospitalProfile.hospital_name = "Your Hospital Name";
-    } 
+    }
     if (!hospitalProfile.hospital_logo) {
       hospitalProfile.hospital_logo = "https://via.placeholder.com/150?text=Hospital+Logo";
     }
@@ -47,13 +48,13 @@ async function getHospitalProfile(req, res) {
     }
     return res.json({
       success: true,
-      data: {hospital_name: hospitalProfile.hospital_name, hospital_logo: logoBase64},
+      data: { hospital_name: hospitalProfile.hospital_name, hospital_logo: logoBase64 },
     });
   } catch (err) {
     console.error("Error fetching hospital profile:", err);
     return res.status(500).json({ message: "Server error" });
-    
-  } 
+
+  }
 
 }
 
@@ -88,7 +89,7 @@ async function changeHospitalName(req, res) {
 async function createFeedback(req, res) {
   try {
     const { department_name, questions, logo_png } = req.body;
-    
+
     if (!department_name) {
       return res.status(400).json({ message: "Department name required" });
     }
@@ -98,8 +99,8 @@ async function createFeedback(req, res) {
     if (!logo_png) {
       return res.status(401).json({ message: "Department logo required" });
     }
-    
-    
+
+
     const feedback = await FEEDBACK.create({
       hospitalId: new mongoose.Types.ObjectId(req.hospitalId),
       feedback_name: `${department_name}`,
@@ -120,7 +121,7 @@ async function createFeedback(req, res) {
 }
 
 async function getFeedbackById(req, res) {    // GET /admin/getfeedbackform/:id
-                                              //get feedback by Feedback ID and hospital ID, return 404 if not found
+  //get feedback by Feedback ID and hospital ID, return 404 if not found
   const feedback = await FEEDBACK.findOne({
     _id: req.params.id,
     hospitalId: req.hospitalId,
@@ -136,7 +137,7 @@ async function getFeedbackById(req, res) {    // GET /admin/getfeedbackform/:id
 
 
 async function updateFeedbackById(req, res) {  // PUT /admin/feedback/:id
-                                               //update feedback by Feedback ID and hospital ID, return 404 if not found
+  //update feedback by Feedback ID and hospital ID, return 404 if not found
   const { questions, isActive } = req.body;
 
   await FEEDBACK.updateOne(
@@ -148,33 +149,70 @@ async function updateFeedbackById(req, res) {  // PUT /admin/feedback/:id
 
 }
 async function deleteFeedbackById(req, res) {  // DELETE /admin/feedback/:id
-                                               //delete feedback by Feedback ID and hospital ID, return 404 if not found
-try{  await FEEDBACK.deleteOne(
-    { _id: req.params.id, hospitalId: req.hospitalId }
-  );
+  //delete feedback by Feedback ID and hospital ID, return 404 if not found
+  try {
+    await FEEDBACK.deleteOne(
+      { _id: req.params.id, hospitalId: req.hospitalId }
+    );
 
 
-  res.status(200).json({ success: true });
-}catch(err){
-  res.status(500).json({ success: false, message: "Error deleting feedback" });
-}}
+    res.status(200).json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Error deleting feedback" });
+  }
+}
 
 
- async function getFeedbackQR(req, res) {
-    const feedback = await FEEDBACK.findOne({
-      _id: req.params.id,
-      hospitalId: req.hospitalId,
-    });
+async function getFeedbackQR(req, res) {
+  const feedback = await FEEDBACK.findOne({
+    _id: req.params.id,
+    hospitalId: req.hospitalId,
+  });
 
-    if (!feedback) {
-      return res.status(404).json({ message: "Feedback not found" });
+  if (!feedback) {
+    return res.status(404).json({ message: "Feedback not found" });
+  }
+
+  const { qrBase64 } = await generateFeedbackQR(feedback._id);
+
+  res.status(200).json({
+    success: true,
+    qr: qrBase64,
+  });
+}
+
+
+
+
+
+
+async function getFeedbackResponses(req, res, next) {
+  try {
+    const feedbackId = req.params.id;
+    const hospitalId = req.hospitalId;
+
+    const responses = await FEEDBACK_RESPONSE.find({
+      feedbackId,
+      hospitalId,
+    }).sort({ createdAt: -1 });
+
+    if (!responses || responses.length === 0) {
+      return res.status(415).json({
+        success: false,
+        message: `No responses found for this feedback form. `,
+      });
     }
 
-    const { qrBase64 } = await generateFeedbackQR(feedback._id);
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      qr: qrBase64,
+      data: responses,
     });
+  } catch (err) {
+    console.log(err);
+     // 👈 IMPORTANT
   }
-module.exports = { getFeedbacksByHospital, getHospitalProfile, changeHospitalName, createFeedback, getFeedbackById,updateFeedbackById,deleteFeedbackById, getFeedbackQR };
+}
+
+
+
+module.exports = { getFeedbacksByHospital, getHospitalProfile, changeHospitalName, createFeedback, getFeedbackById, updateFeedbackById, deleteFeedbackById, getFeedbackQR, getFeedbackResponses };

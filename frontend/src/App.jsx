@@ -21,7 +21,7 @@ import SuperAdminComplaintBoard from './pages/SuperAdminComplaintBoard'
 import SuperAdminComplaintList from './pages/SuperAdminComplaintList'
 import CreateFeedback from './CreateFeeback'
 import EditFeedback from './pages/EditFeedbackForm'
-import PublicFeedbackForm from './SubmitFeedbackResponce'
+import PublicFeedbackForm from './pages/SubmitFeedbackResponce'
 
 function App() {
   return (

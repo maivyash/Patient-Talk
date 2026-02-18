@@ -1,6 +1,6 @@
 const express = require("express");
 const authcontroller = require("../middleware/auth");
-const { getFeedbacksByHospital, getHospitalProfile, changeHospitalName, createFeedback, getFeedbackById, updateFeedbackById, deleteFeedbackById, getFeedbackQR } = require("../controllers/adminRoutesController");
+const { getFeedbacksByHospital, getHospitalProfile, changeHospitalName, createFeedback, getFeedbackById, updateFeedbackById, deleteFeedbackById, getFeedbackQR, getFeedbackResponses } = require("../controllers/adminRoutesController");
 
 const router = express.Router();
 
@@ -12,6 +12,8 @@ router.get("/getfeedbackform/:id", authcontroller, getFeedbackById);
 router.put("/updatefeedbackform/:id", authcontroller, updateFeedbackById);
 router.delete("/deletefeedbackform/:id", authcontroller, deleteFeedbackById)
 router.get("/feedback/:id/qr",authcontroller,getFeedbackQR);
+router.get("/feedbackResponces/:id",authcontroller,getFeedbackResponses);
+
 
 
 

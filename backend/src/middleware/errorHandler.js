@@ -1,23 +1,20 @@
 function notFoundHandler(req, res, next) {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-    path: req.originalUrl,
-  });
+  if (res.headersSent) return next();
+  res.status(404).json({ message: "Route not found" });
 }
 
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
-  // eslint-disable-next-line no-console
-  console.error("Unhandled error:", err);
+  if (res.headersSent) {
+    return next(err);
+  }
 
-  const status = err.statusCode || 500;
-
-  res.status(status).json({
+  res.status(500).json({
     success: false,
-    message: err.message || "Internal server error",
+    message: err.message || "Server error",
   });
 }
+
 
 module.exports = {
   notFoundHandler,
