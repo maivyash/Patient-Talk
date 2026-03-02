@@ -39,6 +39,7 @@ async function signup(req, res, next) {
       hospital_logo,
       // optional: image mime type, e.g. "image/png"
       hospital_logo_mime,
+      location,
     } = req.body || {};
 
     if (
@@ -46,7 +47,8 @@ async function signup(req, res, next) {
       !hospital_email ||
       !hospital_phno ||
       !hospital_password ||
-      !hospital_logo
+      !hospital_logo||
+      !location
     ) {
       return res.status(401).json({
         success: false,
@@ -119,6 +121,7 @@ async function signup(req, res, next) {
         data: logoBuffer,
         contentType,
       },
+      location,
     });
 
     const token = signToken({
@@ -302,9 +305,24 @@ async function superadminLogin(req, res, next) {
 
 }
 
+async function logout(req, res,next) {
+  res.clearCookie("token", { 
+    httpOnly: true, 
+    secure: false,
+    sameSite: "lax",
+  });
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+}
+
+
+
 module.exports = {
   signup,
   login,
-  superadminLogin
+  superadminLogin,
+  logout
 };
 

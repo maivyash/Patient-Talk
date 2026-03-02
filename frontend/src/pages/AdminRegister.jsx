@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import "./Register.css";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
+import { usCities } from "../components/usCities";
 
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
@@ -12,8 +14,8 @@ export default function AdminRegister() {
     hospital_email: "",
     hospital_password: "",
     hospital_phno: "",
-
     hospital_logo: null,
+    location: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -45,7 +47,9 @@ export default function AdminRegister() {
     if (!form.hospital_logo) {
       newErrors.hospital_logo = "Hospital logo is required";
     }
-
+    if (!form.location) {
+      newErrors.location = "Hospital location is required";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -59,95 +63,95 @@ export default function AdminRegister() {
         type === "checkbox"
           ? checked
           : type === "file"
-          ? files[0]
-          : value,
+            ? files[0]
+            : value,
     });
   };
   const fileToBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
-};
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validate()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-  const formData = new FormData();
+    const formData = new FormData();
 
-  formData.append("hospital_name", form.hospital_name);
-  formData.append("hospital_email", form.hospital_email);
-  formData.append("hospital_password", form.hospital_password);
-  formData.append("hospital_phno", form.hospital_phno);
+    formData.append("hospital_name", form.hospital_name);
+    formData.append("hospital_email", form.hospital_email);
+    formData.append("hospital_password", form.hospital_password);
+    formData.append("hospital_phno", form.hospital_phno);
 
-  // ✅ Convert logo to Base64
+    // ✅ Convert logo to Base64
 
-   const base64Logo = await fileToBase64(form.hospital_logo);
+    const base64Logo = await fileToBase64(form.hospital_logo);
 
-// REMOVE data:image/...;base64,
-const pureBase64 = base64Logo.split(",")[1];
+    // REMOVE data:image/...;base64,
+    const pureBase64 = base64Logo.split(",")[1];
 
 
-const normalizedPhone = form.hospital_phno.replace(/\D/g, "");
-formData.append("hospital_phno", normalizedPhone);
+    const normalizedPhone = form.hospital_phno.replace(/\D/g, "");
+    formData.append("hospital_phno", normalizedPhone);
 
-formData.append("hospital_logo", pureBase64);
+    formData.append("hospital_logo", pureBase64);
 
-const payload = {
-  hospital_name: form.hospital_name,
-  hospital_email: form.hospital_email,
-  hospital_password: form.hospital_password,
-  hospital_phno: normalizedPhone,
-  hospital_logo: pureBase64, // base64 string only
-};
+    const payload = {
+      hospital_name: form.hospital_name,
+      hospital_email: form.hospital_email,
+      hospital_password: form.hospital_password,
+      hospital_phno: normalizedPhone,
+      hospital_logo: pureBase64, // base64 string only
+      location: form.location.value
+    };
 
-  
+
 
 
     try {
       const res = await fetch(`${BACKENDURL}/api/auth/signup`, {
-         method: "POST",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-       
+
         body: JSON.stringify(payload),
       });
       if (res.status === 409) {
         alert("Email already exists!");
-         throw new Error("Email already exists");
+        throw new Error("Email already exists");
         return
-       
-        ;
+
+          ;
 
       }
       if (res.status === 401) {
-         alert("Invalid input data!"+res.message);
+        alert("Invalid input data!" + res.message);
         throw new Error("Invalid input data");
-       
-        return; 
+
+        return;
       }
-      if (!res.ok) 
-        {
-          throw new Error("Registration failed")
-          alert("Registration failed!")
-          return;
-        }else{
+      if (!res.ok) {
+        throw new Error("Registration failed")
+        alert("Registration failed!")
+        return;
+      } else {
         alert("Registration successful!");
         navigate("/admin/login", { replace: true });
-        }
+      }
 
-      
+
     } catch (err) {
       alert(err.message);
     }
- 
 
-};
+
+  };
 
 
   return (
@@ -199,7 +203,16 @@ const payload = {
         />
         {errors.hospital_phno && <p className="error">{errors.hospital_phno}</p>}
 
-        
+        <label>Hospital Location (USA)</label>
+        <Select
+          options={usCities}
+          placeholder="Select city"
+          value={form.location}
+          onChange={(selected) =>
+            setForm({ ...form, location: selected })
+          }
+        />
+        {errors.location && <p className="error">{errors.location}</p>}
 
         <button className="login-btn" type="submit">
           Register

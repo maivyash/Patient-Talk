@@ -48,6 +48,23 @@ const HOSPITAL_DETAILS_Schema = new mongoose.Schema(
         type: String, // image/png, image/jpeg, image/webp, etc.
         required: true,
       },
+      
+    },
+    location:{
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200, 
+      
+    },
+     userColor: {
+      type: String,
+      default: "#FFFFFF",
+    },
+
+    adminColor: {
+      type: String,
+      default: "#FFFFFF",
     },
   },
   { timestamps: true, collection: "HOSPITAL_DETAILS" }

@@ -50,16 +50,14 @@ const feedbackSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+// In FEEDBACK_RESPONSE schema
+assignedTo: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "FEEDBACK_PERSON",
+  }
+],
 
-    concern_person_detail_1: {
-      type: String,
-      default: null, // ✅ nullable
-    },
-
-    concern_person_detail_2: {
-      type: String,
-      default: null, // ✅ nullable
-    },
   },
   {
     timestamps: true,

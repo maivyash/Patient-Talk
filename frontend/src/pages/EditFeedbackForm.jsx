@@ -33,10 +33,62 @@ export default function EditFeedback() {
   }, [id]);
 
   // 🔹 Stub: complaints (future)
-  useEffect(() => {
-    // TODO: API later
-    setComplaints([]);
-  }, []);
+// 🔹 Load complaints (responses)
+useEffect(() => {
+  const fetchComplaints = async () => {
+    try {
+      const res = await fetch(
+        `${BACKENDURL}/api/admin/feedbackResponces/${id}`,
+        { credentials: "include" }
+      );
+
+      if (res.status === 401 || res.status === 412) {
+        alert("Session expired. Please log in again.");
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        setComplaints(data.data);
+      }
+    } catch (err) {
+      console.error("Failed to load complaints", err);
+    }
+  };
+
+  fetchComplaints();
+}, [id, navigate]);
+
+const deleteComplaint = async (responseId) => {
+  const confirm = window.confirm("Delete this complaint permanently?");
+  if (!confirm) return;
+
+  try {
+    const res = await fetch(
+      `${BACKENDURL}/api/admin/deletefeedbackresponse/${responseId}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(data.message || "Failed to delete complaint");
+    }
+
+    // 🔄 Remove from UI immediately
+    setComplaints((prev) =>
+      prev.filter((c) => c._id !== responseId)
+    );
+
+    alert("Complaint deleted");
+  } catch (err) {
+    alert("Server error while deleting complaint");
+  }
+};
 
   const addQuestion = () => {
     if (!newQuestion.trim()) return alert("Question cannot be empty");
@@ -156,17 +208,90 @@ navigate("/login",{ replace: true });
       />
       <button onClick={addQuestion}>ADD</button>
 
-      {/* COMPLAINTS (FUTURE) */}
-      <h4>COMPLAINTS OR FEEDBACK</h4>
-      {complaints.length === 0 ? (
-        <p className="muted">No complaints loaded yet</p>
-      ) : (
-        complaints.map((c, i) => (
-          <div key={i} className="complaint-row">
-            COMPLAINT <button>View</button>
-          </div>
-        ))
-      )}
+      {/* COMPLAINTS */}
+<h4>COMPLAINTS / FEEDBACK RESPONSES</h4>
+
+{/* COMPLAINTS OR FEEDBACK */}
+<h4 className="complaints-title">COMPLAINTS OR FEEDBACK</h4>
+
+{complaints.length === 0 ? (
+  <p className="muted">No complaints submitted yet</p>
+) : (
+  complaints.map((complaint, idx) => (
+    <div key={complaint._id} className="complaint-box">
+      
+      <h5 className="complaint-header">
+        Complaint #{idx + 1}
+      </h5>
+
+      {complaint.responses.map((r, qIdx) => (
+        <div key={qIdx} className="complaint-question">
+          
+          <p className="question-text">
+            Q{qIdx + 1}. {questions.find(q => q._id === r.questionId)?.text || "Question"}
+          </p>
+
+          {/* TEXT */}
+          {r.answerType === "text" && (
+            <div className="text-answer-box">
+              {r.answerText}
+            </div>
+          )}
+
+          {/* RATING */}
+          {r.answerType === "rating" && (
+            <div className="rating-stars">
+              {"⭐".repeat(r.ratingValue || 0)}
+            </div>
+          )}
+
+          {/* IMAGE */}
+          {r.answerType === "image" && (
+            <button
+              className="view-btn"
+              onClick={() => window.open(`${BACKENDURL}${r.mediaUrl}`, "_blank")}
+            >
+              View Image
+            </button>
+          )}
+
+          {/* VIDEO */}
+          {r.answerType === "video" && (
+            <button
+              className="view-btn"
+              onClick={() => window.open(`${BACKENDURL}${r.mediaUrl}`, "_blank")}
+            >
+              View Video
+            </button>
+          )}
+
+          {/* AUDIO */}
+          {r.answerType === "audio" && (
+            <audio
+              controls
+              className="audio-player"
+              src={`${BACKENDURL}${r.mediaUrl}`}
+            />
+          )}
+
+        </div>
+      ))}
+  <button
+      className="delete-complaint-btn"
+      onClick={() => deleteComplaint(complaint._id)}
+      title="Delete complaint"
+    >
+      🗑
+    </button>
+      <p className="created-at">
+        Created at: {new Date(complaint.createdAt).toLocaleString()}
+      </p>
+
+    </div>
+  ))
+)}
+
+
 
       {/* TOGGLES */}
       <div className="toggle-row">

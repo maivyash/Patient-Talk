@@ -1,0 +1,35 @@
+.theme-page {
+  max-width: 420px;
+  margin: 40px auto;
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.color-row span {
+  font-weight: 500;
+}
+
+.color-row code {
+  font-size: 12px;
+  background: #eee;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 12px;
+  background: #1c6e73;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

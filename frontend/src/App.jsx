@@ -22,6 +22,11 @@ import SuperAdminComplaintList from './pages/SuperAdminComplaintList'
 import CreateFeedback from './CreateFeeback'
 import EditFeedback from './pages/EditFeedbackForm'
 import PublicFeedbackForm from './pages/SubmitFeedbackResponce'
+import PublicFeedbackHome from './pages/UserHomeforFeedbackkForm'
+import AdminAssignPage from './pages/AdminAssignPerson'
+import SecureFeedbackView from './pages/ResponceViewer'
+import changeTheme from './pages/changeTheme'
+import ChangeTheme from './pages/changeTheme'
 
 function App() {
   return (
@@ -42,8 +47,11 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/createFeedback" element={<CreateFeedback/>}/>
         <Route path="/feedback/:id" element={<PublicFeedbackForm />} />
-
+        <Route path="/user/HomeforFeedback/:hospitalId" element={<PublicFeedbackHome/>} />
         <Route path='admin/feedback/edit/:id' element={<EditFeedback />} />
+        <Route path="/admin/assignperson" element={<AdminAssignPage />} />
+        <Route path='mailPerson/getFeedbackResponsesByToken/:token' element={<SecureFeedbackView />} />
+        <Route path='/admin/changeHospitaltheme' element={<ChangeTheme/>}/>
          {/*<Route path="/complaints" element={<ComplaintBoard />} />
         <Route path="/complaints/new" element={<ComplaintBuilder />} />
         <Route path="/complaints/:categoryId" element={<ComplaintForm />} />

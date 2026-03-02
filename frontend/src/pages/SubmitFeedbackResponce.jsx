@@ -5,11 +5,13 @@ import "./PublicFeedback.css";
 import useImageCapture from "../components/imageCapruturer";
 import useAudioRecorder from "../components/AudioRecorder";
 import useVideoRecorder from "../components/VideoRecorder";
+import { useNavigate } from "react-router-dom";
 
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 // Separate component for each question to manage its own hooks
 function QuestionAnswer({ question, index, onAnswerChange, answer }) {
+  
   const image = useImageCapture();
   const audio = useAudioRecorder();
   const video = useVideoRecorder();
@@ -407,6 +409,7 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
 }
 
 export default function FeedbackResponse() {
+  const navigate = useNavigate();
   const { id } = useParams();
 
   const [feedback, setFeedback] = useState(null);
@@ -443,23 +446,13 @@ export default function FeedbackResponse() {
 
 
   // 🔹 Submit
- const submitFeedback = async () => {
+const submitFeedback = async () => {
+  if (!feedback) return;
+
   const formData = new FormData();
   const responses = [];
 
-  const validQuestionIds = new Set(
-  feedback.questions.map(q => String(q._id))
-);
-
-for (const r of responses) {
-  if (!validQuestionIds.has(String(r.questionId))) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid question detected",
-    });
-  }
-}
-
+  // Build responses
   for (const q of feedback.questions) {
     const ans = answers[q._id];
     if (!ans) continue;
@@ -469,15 +462,15 @@ for (const r of responses) {
       answerType: ans.answerType,
     };
 
-    if (ans.answerType === "text") {
+    if (ans.answerType === "text" && ans.answerText?.trim()) {
       item.answerText = ans.answerText;
     }
 
-    if (ans.answerType === "rating") {
+    if (ans.answerType === "rating" && ans.ratingValue) {
       item.ratingValue = ans.ratingValue;
     }
 
-    if (["image", "audio", "video"].includes(ans.answerType)) {
+    if (["image", "audio", "video"].includes(ans.answerType) && ans.file) {
       const key = `file_${q._id}`;
       formData.append(key, ans.file);
       item.fileKey = key;
@@ -486,15 +479,44 @@ for (const r of responses) {
     responses.push(item);
   }
 
-  formData.append("responses", JSON.stringify(responses));
-  
-  await fetch(`${BACKENDURL}/api/user/submitFeedbackForUser/${id}`, {
-    method: "POST",
-    body: formData,
-  });
+  // 🚨 VALIDATION: At least one answered question required
+  if (responses.length === 0) {
+    alert("Please answer at least one question before submitting.");
+    return;
+  }
 
-  alert("Thank you for your feedback!");
+  formData.append("responses", JSON.stringify(responses));
+
+  try {
+    setLoading(true);
+
+    const response = await fetch(
+      `${BACKENDURL}/api/user/submitFeedbackForUser/${id}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      alert(result.message || "Submission failed. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    setAnswers({});
+    alert("Thank you for your feedback!");
+    navigate(`/user/HomeforFeedback/${feedback.hospitalId}`, { replace: true });
+
+  } catch (err) {
+    alert("Network error. Please try again.");
+  } finally {
+    setLoading(false);
+  }
 };
+
 
 
   if (!feedback)

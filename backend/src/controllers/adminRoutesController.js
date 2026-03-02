@@ -5,7 +5,8 @@ const { get } = require("mongoose");
 const HOSPITAL_DETAILS = require("../models/HOSPITAL_DETAILS");
 const { generateFeedbackQR } = require("../helpers/QRgenerator");
 const FEEDBACK_RESPONSE = require("../models/FeedbackResponses");
-
+const FEEDBACK_PERSON = require("../models/ContactPerson");
+const authMiddleware = require("../middleware/auth");
 
 
 
@@ -209,10 +210,167 @@ async function getFeedbackResponses(req, res, next) {
     });
   } catch (err) {
     console.log(err);
-     // 👈 IMPORTANT
+    // 👈 IMPORTANT
+  }
+}
+
+
+async function DeleteResponseById(req, res) {
+  try {
+    const responseId = req.params.id;
+    const hospitalId = req.hospitalId;
+
+    await FEEDBACK_RESPONSE.deleteOne({
+      _id: responseId,
+      hospitalId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Response deleted successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ success: false, message: "Error deleting response" });
+  }
+}
+async function addFeedbackPerson(req, res) {
+  try {
+    const { name, mobile, email } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ success: false, message: "Name required" });
+    }
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: "Mobile number required" });
+    }
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email required" });
+    }
+    if (!/^\d{10}$/.test(mobile)) {
+      return res.status(400).json({ success: false, message: "Invalid mobile number format" });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ success: false, message: "Invalid email format" });
+    }
+
+
+    const person = await FEEDBACK_PERSON.create({
+      hospitalId: req.hospitalId,
+      name,
+      mobile,
+      email,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: person,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false });
   }
 }
 
 
 
-module.exports = { getFeedbacksByHospital, getHospitalProfile, changeHospitalName, createFeedback, getFeedbackById, updateFeedbackById, deleteFeedbackById, getFeedbackQR, getFeedbackResponses };
+
+async function getFeedbackPersons(req, res) {
+  const persons = await FEEDBACK_PERSON.find({
+    hospitalId: req.hospitalId,
+  }).sort({ createdAt: -1 });
+
+  res.json({ success: true, data: persons });
+}
+
+
+
+
+
+async function assignFeedbackPerson(req, res) {
+  try {
+    const { feedbackId, personId, assign } = req.body;
+    const hospitalId = req.hospitalId;
+
+    const feedback = await FEEDBACK.findOne({ _id: feedbackId, hospitalId });
+    const person = await FEEDBACK_PERSON.findOne({ _id: personId, hospitalId });
+
+    if (!feedback || !person) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+
+    if (assign) {
+      // add person to feedback
+      await FEEDBACK.updateOne(
+        { _id: feedbackId },
+        { $addToSet: { assignedTo: personId } }
+      );
+
+      // add feedback to person
+      await FEEDBACK_PERSON.updateOne(
+        { _id: personId },
+        {
+          $addToSet: {
+            assignedFeedbacks: {
+              feedbackId,
+              departmentName: feedback.feedback_name,
+            },
+          },
+        }
+      );
+    } else {
+      // remove person from feedback
+      await FEEDBACK.updateOne(
+        { _id: feedbackId },
+        { $pull: { assignedTo: personId } }
+      );
+
+      // remove feedback from person
+      await FEEDBACK_PERSON.updateOne(
+        { _id: personId },
+        { $pull: { assignedFeedbacks: { feedbackId } } }
+      );
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+}
+
+
+async function changeTheme(req, res) {
+  try {
+    const { primaryColor, secondaryColor } = req.body;
+
+    if (!primaryColor || !secondaryColor) {
+      return res.status(400).json({
+        success: false,
+        message: "Primary and Secondary colors are required",
+      });
+    }
+
+    await HOSPITAL_DETAILS.findByIdAndUpdate(
+      req.hospitalId,
+      {
+        adminColor: primaryColor,
+        userColor: secondaryColor,
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Theme updated successfully",
+    });
+  } catch (err) {
+    console.error("Error updating theme:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
+
+
+module.exports = { getFeedbacksByHospital, getHospitalProfile, changeHospitalName, createFeedback, getFeedbackById, updateFeedbackById, deleteFeedbackById, getFeedbackQR, getFeedbackResponses, DeleteResponseById, addFeedbackPerson, getFeedbackPersons, assignFeedbackPerson, changeTheme };

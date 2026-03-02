@@ -59,10 +59,85 @@ const feedbackResponseSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    accessToken: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+
+    tokenExpiresAt: {
+      type: Date,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
+
+
+
+const FEEDBACK = require("./feedback");
+const FEEDBACK_PERSON = require("./ContactPerson");
+const { sendMail } = require("../helpers/mailutility");
+
+
+const { generateFeedbackAccessToken } = require("../helpers/feedbackmailaccesstoken");
+
+feedbackResponseSchema.post("save", async function (doc) {
+  console.log("SENDING MAIL...........!");
+  
+  try {
+    const feedback = await FEEDBACK.findById(doc.feedbackId)
+      .populate("assignedTo");
+
+    if (!feedback?.assignedTo?.length) return;
+
+    const emails = feedback.assignedTo
+      .map(p => p.email)
+      .filter(Boolean);
+
+    if (!emails.length) return;
+
+    // 🔐 Generate secure access token
+    // const token = generateFeedbackAccessToken({
+    //   feedbackId: feedback._id,
+    //   emails,
+     
+    // });
+    const token=doc.accessToken;
+
+    const link = `${process.env.FRONTEND_URL}/mailPerson/getFeedbackResponsesByToken/${token}`;
+
+    const html = `
+      <h2>📩 New Feedback Received</h2>
+      <p><b>Department:</b> ${feedback.feedback_name}</p>
+      <p><b>Submitted:</b> ${doc.createdAt.toLocaleString()}</p>
+      <hr/>
+      <a href="${link}" 
+         style="padding:10px 16px;background:#1c6e73;color:#fff;
+                text-decoration:none;border-radius:6px">
+        View Feedback Securely
+      </a>
+      <p style="margin-top:10px;color:#666">
+        This link expires in 48 hours and is accessible only to you.
+      </p>
+    `;
+
+     await sendMail({
+       to: emails,
+       subject: "📩 New Patient Feedback Received",
+      html,
+    });
+
+    console.log("✅ Secure feedback email sent");
+  } catch (err) {
+    console.error("❌ Email hook error:", err);
+  }
+});
+
 module.exports =
   mongoose.models.FEEDBACK_RESPONSE ||
   mongoose.model("FEEDBACK_RESPONSE", feedbackResponseSchema);
+
+/* ---- schemas unchanged ---- */

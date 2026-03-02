@@ -16,7 +16,49 @@ export default function AdminDashboard() {
   const [hospitalLogo, setHospitalLogo] = useState("");
   const [editingName, setEditingName] = useState(false);
 
+
+
+
+
+
+
+  const [menuOpen, setMenuOpen] = useState(false);
+const [darkTheme, setDarkTheme] = useState(
+  localStorage.getItem("theme") === "dark"
+);
+
+
+
+const handleLogout = async () => {
+ try {
+    await fetch(`${BACKENDURL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include", // 🔥 REQUIRED
+    });
+
+    // Clear frontend-only storage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    navigate("/login", { replace: true });
+    
+  } catch (error) {
+    console.error("Logout failed:", error);
+    // You might still want to navigate them away even if the API fails
+    navigate("/login", { replace: true });
+  }
+};
+
+const toggleTheme = () => {
+  const nextTheme = !darkTheme;
+  setDarkTheme(nextTheme);
+  localStorage.setItem("theme", nextTheme ? "dark" : "light");
+  document.body.classList.toggle("dark-theme", nextTheme);
+};
+
+
   // 🔹 Load hospital header info
+
   useEffect(() => {
     fetch(`${BACKENDURL}/api/admin/hospital/profile`, {
       credentials: "include",
@@ -88,8 +130,12 @@ useEffect(() => {
     <div className="admin-feedback-page">
       {/* TOP BAR */}
       <header className="top-bar">
-        <span className="menu-icon">☰</span>
-
+        <span
+  className="menu-icon"
+  onClick={() => setMenuOpen((prev) => !prev)}
+>
+  ☰
+</span>
         <div className="brand">
           <span className="star">★</span>
           <span>Patienttalkback.com</span>
@@ -99,11 +145,42 @@ useEffect(() => {
           {hospitalLogo ? (
             <img src={hospitalLogo} alt="Hospital Logo" />
           ) : (
-            <div className="logo-placeholder" />
+            <div className="logo-placeholder"></div>
           )}
         </div>
       </header>
+{menuOpen && (
+  <>
+    {/* overlay to close on outside click */}
+    <div
+      className="menu-overlay"
+      onClick={() => setMenuOpen(false)}
+    />
 
+    <div className="menu-dialog">
+      <button
+        onClick={() => {
+          navigate("/admin/assignperson");
+          setMenuOpen(false);
+        }}
+      >
+        👤 Contact Person
+      </button>
+
+      <button
+        onClick={() => {
+          navigate("/admin/changeHospitaltheme")
+        }}
+      >
+        🌓 Theme Change
+      </button>
+
+      <button className="danger" onClick={handleLogout}>
+        🚪 Logout
+      </button>
+    </div>
+  </>
+)}
       {/* HOSPITAL NAME */}
       <div className="hospital-name-row">
         {editingName ? (
@@ -145,7 +222,7 @@ useEffect(() => {
               />
               <p>{item.feedback_name || "Unnamed Feedback Form"}</p>
 
-              <span><img src={editIcon} className="edit-icon"  alt="Edit Feedback Form" onClick={() => navigate(`/admin/feedback/edit/${item._id}`)}/></span>
+              <span><img src={editIcon} className="edit-icon"  alt="Edit Feedback Form" /></span>
             </div>
           ))}
         </div>
