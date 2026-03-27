@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom'
 import './App.css'
 import Home from './pages/Home'
@@ -28,7 +29,35 @@ import SecureFeedbackView from './pages/ResponceViewer'
 import changeTheme from './pages/changeTheme'
 import ChangeTheme from './pages/changeTheme'
 
+const BACKENDURL = import.meta.env.VITE_BACKENDURL;
+
 function App() {
+  useEffect(() => {
+    // Load theme on app start
+    const loadTheme = async () => {
+      try {
+        const res = await fetch(`${BACKENDURL}/api/admin/hospital/profile`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (data.success) {
+          const primary = data.data.adminColor || "#1c6e73";
+          const secondary = data.data.userColor || "#9ed6df";
+          
+          // Apply theme to CSS custom properties
+          document.documentElement.style.setProperty('--primary-color', primary);
+          document.documentElement.style.setProperty('--secondary-color', secondary);
+          
+          // Update body background
+          document.body.style.background = secondary;
+        }
+      } catch (err) {
+        console.log("Theme not loaded (user not authenticated)");
+      }
+    };
+    loadTheme();
+  }, []);
+
   return (
     <div className="app-root">
       <Routes>

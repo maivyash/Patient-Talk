@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Register.css";
+import "./AdminLayout.css";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import { usCities } from "../components/usCities";
@@ -156,68 +157,73 @@ export default function AdminRegister() {
 
   return (
     <div className="login-page">
-      <h1 className="brand">Patienttalkback.com</h1>
-      <div className="star">★</div>
+      {/* Navbar */}
+      <nav className="admin-navbar" style={{ position: 'relative' }}>
+        <div className="admin-nav-left">
+          <button className="admin-back-btn" onClick={() => navigate('/login')}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            Login
+          </button>
+        </div>
+        <div className="admin-nav-center">
+          <div className="admin-brand">
+            <span className="admin-brand-icon-svg">
+              <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="12,5 14.5,9.5 20,10.5 16,14.5 17.5,20 12,17.5 6.5,20 8,14.5 4,10.5 9.5,9.5" fill="#e00000" />
+                <path d="M12 2 A10 10 0 0 1 21.5 8 L18.5 8 L22.5 13 L23.5 7 L20.5 7 A11.5 11.5 0 0 0 12 0.5 Z" fill="#f09b50" />
+                <path d="M12 22 A10 10 0 0 1 2.5 16 L5.5 16 L1.5 11 L0.5 17 L3.5 17 A11.5 11.5 0 0 0 12 23.5 Z" fill="#f09b50" />
+              </svg>
+            </span>
+            <span className="admin-brand-name">PatientTalkback</span>
+          </div>
+        </div>
+        <div className="admin-nav-right"></div>
+      </nav>
 
-      <form className="login-card" onSubmit={handleSubmit}>
-        <label>Hospital Name</label>
-        <input
-          type="text"
-          name="hospital_name"
-          placeholder="Enter hospital name"
-          value={form.hospital_name}
-          onChange={handleChange}
-        />
-        {errors.hospital_name && <p className="error">{errors.hospital_name}</p>}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 20px', position: 'relative', zIndex: 1 }}>
+        <div style={{ width: '100%', maxWidth: '440px' }}>
+          <form className="login-card" onSubmit={handleSubmit}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div className="admin-header-badge" style={{ display: 'inline-flex' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                New Registration
+              </div>
+              <h2 style={{ margin: '0 0 4px', fontSize: '22px', fontWeight: 700, color: 'var(--text-main)' }}>Register Hospital</h2>
+              <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>Create your hospital admin account</p>
+            </div>
 
-        <label>Hospital Logo</label>
-        <input type="file" name="hospital_logo" accept="image/*" onChange={handleChange} />
-        {errors.hospital_logo && <p className="error">{errors.hospital_logo}</p>}
-        <label>Email</label>
-        <input
-          type="email"
-          name="hospital_email"
-          placeholder="Email"
-          value={form.hospital_email}
-          onChange={handleChange}
-        />
-        {errors.hospital_email && <p className="error">{errors.hospital_email}</p>}
+            <label>Hospital Name</label>
+            <input type="text" name="hospital_name" placeholder="Enter hospital name" value={form.hospital_name} onChange={handleChange} />
+            {errors.hospital_name && <p className="error">{errors.hospital_name}</p>}
 
-        <label>Password</label>
-        <input
-          type="password"
-          name="hospital_password"
-          placeholder="Password"
-          value={form.hospital_password}
-          onChange={handleChange}
-        />
-        {errors.hospital_password && <p className="error">{errors.hospital_password}</p>}
+            <label>Hospital Logo</label>
+            <input type="file" name="hospital_logo" accept="image/*" onChange={handleChange} />
+            {errors.hospital_logo && <p className="error">{errors.hospital_logo}</p>}
 
-        <label>Phone Number</label>
-        <input
-          type="tel"
-          name="hospital_phno"
-          placeholder="US Phone Number"
-          value={form.hospital_phno}
-          onChange={handleChange}
-        />
-        {errors.hospital_phno && <p className="error">{errors.hospital_phno}</p>}
+            <label>Email</label>
+            <input type="email" name="hospital_email" placeholder="Email" value={form.hospital_email} onChange={handleChange} />
+            {errors.hospital_email && <p className="error">{errors.hospital_email}</p>}
 
-        <label>Hospital Location (USA)</label>
-        <Select
-          options={usCities}
-          placeholder="Select city"
-          value={form.location}
-          onChange={(selected) =>
-            setForm({ ...form, location: selected })
-          }
-        />
-        {errors.location && <p className="error">{errors.location}</p>}
+            <label>Password</label>
+            <input type="password" name="hospital_password" placeholder="Password" value={form.hospital_password} onChange={handleChange} />
+            {errors.hospital_password && <p className="error">{errors.hospital_password}</p>}
 
-        <button className="login-btn" type="submit">
-          Register
-        </button>
-      </form>
+            <label>Phone Number</label>
+            <input type="tel" name="hospital_phno" placeholder="US Phone Number" value={form.hospital_phno} onChange={handleChange} />
+            {errors.hospital_phno && <p className="error">{errors.hospital_phno}</p>}
+
+            <label>Hospital Location (USA)</label>
+            <Select className="pt-select" classNamePrefix="pt-select" options={usCities} placeholder="Select city" value={form.location} onChange={(selected) => setForm({ ...form, location: selected })} menuPlacement="top" menuPortalTarget={document.body} styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }} />
+            {errors.location && <p className="error">{errors.location}</p>}
+
+            <button className="login-btn" type="submit">Register</button>
+          </form>
+        </div>
+      </div>
+
+      <footer className="admin-footer">
+        <p className="admin-footer-text">Powered by PatientTalkback</p>
+      </footer>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./CreateFeedback.css";
+import "./pages/AdminLayout.css";
 import { useNavigate } from "react-router-dom";
 
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
@@ -73,44 +74,80 @@ export default function CreateFeedback() {
   };
 
   return (
-    <div className="create-feedback-page">
-      <h2>⭐ Patienttalkback.com</h2>
-
-      <input
-        className="input"
-        placeholder="Add text label (Department)"
-        value={department}
-        onChange={(e) => setDepartment(e.target.value)}
-      />
-
-      <label className="upload-btn">
-        Select Image
-        <input type="file" hidden onChange={handleImage} />
-      </label>
-
-      <h4>ADD QUESTION</h4>
-
-      <input
-        className="input"
-        placeholder="Enter Question text"
-        value={questionText}
-        onChange={(e) => setQuestionText(e.target.value)}
-      />
-
-      <button className="btn" onClick={addQuestion}>
-        ADD
-      </button>
-
-      {questions.map((q, i) => (
-        <div key={i} className="question-item">
-          {i + 1}. {q.text}
-          <span onClick={() => removeQuestion(i)}>❌</span>
+    <div className="admin-page">
+      {/* Navbar */}
+      <nav className="admin-navbar">
+        <div className="admin-nav-left">
+          <button className="admin-back-btn" onClick={() => navigate('/admin/dashboard')}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            Dashboard
+          </button>
         </div>
-      ))}
+        <div className="admin-nav-center">
+          <div className="admin-brand">
+            <span className="admin-brand-icon-svg">
+              <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="12,5 14.5,9.5 20,10.5 16,14.5 17.5,20 12,17.5 6.5,20 8,14.5 4,10.5 9.5,9.5" fill="#e00000" />
+                <path d="M12 2 A10 10 0 0 1 21.5 8 L18.5 8 L22.5 13 L23.5 7 L20.5 7 A11.5 11.5 0 0 0 12 0.5 Z" fill="#f09b50" />
+                <path d="M12 22 A10 10 0 0 1 2.5 16 L5.5 16 L1.5 11 L0.5 17 L3.5 17 A11.5 11.5 0 0 0 12 23.5 Z" fill="#f09b50" />
+              </svg>
+            </span>
+            <span className="admin-brand-name">PatientTalkback</span>
+          </div>
+        </div>
+        <div className="admin-nav-right"></div>
+      </nav>
 
-      <button className="submit-btn" onClick={handleSubmit} disabled={loading}>
-        {loading ? "Submitting..." : "SUBMIT"}
-      </button>
+      <div className="admin-content admin-content--narrow">
+        <div className="admin-page-header">
+          <div className="admin-header-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Form
+          </div>
+          <h1 className="admin-page-title">Create Feedback</h1>
+          <p className="admin-page-subtitle">Set up a new feedback form for your department</p>
+        </div>
+
+        <div className="form-container">
+          <div className="form-group">
+            <label htmlFor="department">Department Name</label>
+            <input id="department" className="input" placeholder="Enter department name" value={department} onChange={(e) => setDepartment(e.target.value)} />
+          </div>
+
+          <div className="form-group">
+            <label>Logo Image</label>
+            <label className="upload-btn">Select Image<input type="file" accept="image/*" onChange={handleImage} /></label>
+            {image && (<div className="image-preview"><img src={image} alt="Preview" /></div>)}
+          </div>
+
+          <div className="question-section">
+            <h4>Add Questions</h4>
+            <div className="form-group">
+              <input className="input" placeholder="Enter question text" value={questionText} onChange={(e) => setQuestionText(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && addQuestion()} />
+            </div>
+            <button className="btn" onClick={addQuestion}>Add Question</button>
+
+            {questions.length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                {questions.map((q, i) => (
+                  <div key={i} className="question-item">
+                    <span>{i + 1}. {q.text}</span>
+                    <span onClick={() => removeQuestion(i)}>❌</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button className="submit-btn" onClick={handleSubmit} disabled={loading}>
+            {loading ? "Submitting..." : "Create Feedback"}
+          </button>
+        </div>
+      </div>
+
+      <footer className="admin-footer">
+        <p className="admin-footer-text">Powered by PatientTalkback</p>
+      </footer>
     </div>
   );
 }

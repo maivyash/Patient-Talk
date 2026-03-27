@@ -45,7 +45,10 @@ export default function PersonList({ persons, feedbacks, setFeedbacks }) {
     <div className="assign-list">
       {feedbacks.map((fb) => (
         <div key={fb._id} className="assign-row">
-          <div className="dept-name">{fb.feedback_name}</div>
+          <div className="dept-name">
+            <span style={{ fontWeight: 500, color: "var(--text-muted)", marginRight: "6px" }}>Form Name:</span>
+            {fb.feedback_name}
+          </div>
 
           <div className="person-checkboxes">
             {persons.map((p) => {

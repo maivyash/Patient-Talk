@@ -1,54 +1,368 @@
 .edit-feedback-page {
-  background: #9ed6df;
+  background: var(--secondary-color, #9ed6df);
   min-height: 100vh;
   padding: 20px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-.question-row,
-.complaint-row {
+.edit-feedback-page h2 {
+  color: var(--primary-color, #1c6e73);
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.edit-feedback-page h3 {
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.form-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section h4 {
+  color: var(--primary-color, #1c6e73);
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary-color, #1c6e73);
+  padding-bottom: 8px;
+}
+
+.question-row {
   display: flex;
   justify-content: space-between;
-  background: #fff;
-  margin: 8px 0;
-  padding: 8px;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+
+.question-row span {
+  flex: 1;
+  font-size: 16px;
+}
+
+.question-row button {
+  background: #c0392b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.question-row button:hover {
+  background: #a93226;
 }
 
 .divider {
   margin: 20px 0;
-  align-items:center; 
-  display: flex; 
+  display: flex;
+  align-items: center;
   justify-content: center;
+  font-weight: 600;
+  color: #666;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+  margin: 0 10px;
+}
+
+.add-question-section input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.add-question-section input:focus {
+  outline: none;
+  border-color: var(--primary-color, #1c6e73);
+  box-shadow: 0 0 0 3px rgba(28, 110, 115, 0.1);
+}
+
+.add-question-section button {
+  background: var(--primary-color, #1c6e73);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 16px;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.add-question-section button:hover {
+  background: #0f4a4f;
+}
+
+.complaints-section .complaints-title {
+  margin-top: 0;
+}
+
+.complaint-box {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.complaint-header {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--primary-color, #1c6e73);
+  font-size: 18px;
+}
+
+.complaint-question {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.question-text {
+  font-size: 16px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.text-answer-box {
+  background: #e9ecef;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #495057;
+}
+
+.rating-stars {
+  font-size: 20px;
+  color: gold;
+}
+
+.view-btn {
+  background: var(--primary-color, #1c6e73);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.view-btn:hover {
+  background: #0f4a4f;
+}
+
+.audio-player {
+  width: 100%;
+  margin-top: 8px;
+  border-radius: 6px;
+}
+
+.delete-complaint-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #c0392b;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.delete-complaint-btn:hover {
+  background: #a93226;
+}
+
+.created-at {
+  margin-top: 12px;
+  font-size: 12px;
+  text-align: right;
+  opacity: 0.7;
+  color: #666;
 }
 
 .toggle-row {
   display: flex;
   justify-content: space-between;
-  margin: 20px 0;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.toggle-row span {
+  font-weight: 500;
+  color: #333;
+}
+
+.toggle-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary-color, #1c6e73);
+}
+
+.actions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .primary {
-  background: #4b8d94;
+  background: var(--secondary-color);
   color: white;
-  padding: 10px;
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
   width: 100%;
-} 
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.primary:hover {
+  box-shadow: 0 4px 16px rgba(28, 110, 115, 0.3);
+}
+
+.primary:active {
+  transform: scale(0.98);
+}
 
 .danger {
-  background: red;
+  background: #c0392b;
   color: white;
-  margin: 10px 0;
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
   width: 100%;
+  transition: background 0.2s;
+}
+
+.danger:hover {
+  background: #a93226;
 }
 
 .secondary {
-  margin-top: 10px;
+  background: #6c757d;
+  color: white;
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
   width: 100%;
+  transition: background 0.2s;
+}
+
+.secondary:hover {
+  background: #5a6268;
 }
 
 .center {
   text-align: center;
+  margin-top: 40px;
+  font-size: 18px;
+  color: #666;
 }
+
+.muted {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .edit-feedback-page {
+    padding: 16px;
+  }
+
+  .form-container {
+    padding: 24px;
+  }
+
+  .edit-feedback-page h2 {
+    font-size: 20px;
+  }
+
+  .edit-feedback-page h3 {
+    font-size: 18px;
+  }
+
+  .question-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .question-row button {
+    align-self: flex-end;
+  }
+
+  .complaint-box {
+    padding: 16px;
+  }
+
+  .toggle-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
 
 .muted {
   color: #444;

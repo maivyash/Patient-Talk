@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./EditFeedback.css";
+import "./AdminLayout.css";
 import { useNavigate, useParams } from "react-router-dom";
 
 
@@ -185,136 +186,164 @@ navigate("/login",{ replace: true });
   if (loading) return <p className="center">Loading...</p>;
 
   return (
-    <div className="edit-feedback-page">
-      <h2>⭐ Patienttalkback.com</h2>
-      <h3>{feedback.department_name}</h3>
-
-      {/* EXISTING QUESTIONS */}
-      {questions.map((q, i) => (
-        <div key={i} className="question-row">
-          <span>{`${q.text} \t \t(ALREADY IN FORM)`}</span>
-          <button onClick={() => removeQuestion(i)}>🗑</button>
+    <div className="admin-page">
+      {/* Navbar */}
+      <nav className="admin-navbar">
+        <div className="admin-nav-left">
+          <button className="admin-back-btn" onClick={() => navigate('/admin/dashboard')}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            Dashboard
+          </button>
         </div>
-      ))}
+        <div className="admin-nav-center">
+          <div className="admin-brand">
+            <span className="admin-brand-icon-svg">
+              <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="12,5 14.5,9.5 20,10.5 16,14.5 17.5,20 12,17.5 6.5,20 8,14.5 4,10.5 9.5,9.5" fill="#e00000" />
+                <path d="M12 2 A10 10 0 0 1 21.5 8 L18.5 8 L22.5 13 L23.5 7 L20.5 7 A11.5 11.5 0 0 0 12 0.5 Z" fill="#f09b50" />
+                <path d="M12 22 A10 10 0 0 1 2.5 16 L5.5 16 L1.5 11 L0.5 17 L3.5 17 A11.5 11.5 0 0 0 12 23.5 Z" fill="#f09b50" />
+              </svg>
+            </span>
+            <span className="admin-brand-name">PatientTalkback</span>
+          </div>
+        </div>
+        <div className="admin-nav-right"></div>
+      </nav>
 
-      <div className="divider">OR</div>
+      <div className="admin-content">
+        <div className="admin-page-header">
+          <div className="admin-header-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Form
+          </div>
+          <h1 className="admin-page-title">{feedback?.feedback_name || "Edit Feedback"}</h1>
+        </div>
 
-      {/* ADD QUESTION */}
-      <h4>ADD QUESTION</h4>
-      <input
-        placeholder="Enter Question text"
-        value={newQuestion}
-        onChange={(e) => setNewQuestion(e.target.value)}
-      />
-      <button onClick={addQuestion}>ADD</button>
-
-      {/* COMPLAINTS */}
-<h4>COMPLAINTS / FEEDBACK RESPONSES</h4>
-
-{/* COMPLAINTS OR FEEDBACK */}
-<h4 className="complaints-title">COMPLAINTS OR FEEDBACK</h4>
-
-{complaints.length === 0 ? (
-  <p className="muted">No complaints submitted yet</p>
-) : (
-  complaints.map((complaint, idx) => (
-    <div key={complaint._id} className="complaint-box">
-      
-      <h5 className="complaint-header">
-        Complaint #{idx + 1}
-      </h5>
-
-      {complaint.responses.map((r, qIdx) => (
-        <div key={qIdx} className="complaint-question">
-          
-          <p className="question-text">
-            Q{qIdx + 1}. {questions.find(q => q._id === r.questionId)?.text || "Question"}
-          </p>
-
-          {/* TEXT */}
-          {r.answerType === "text" && (
-            <div className="text-answer-box">
-              {r.answerText}
-            </div>
+      <div className="form-container">
+        {/* EXISTING QUESTIONS */}
+        <div className="section">
+          <h4>Existing Questions</h4>
+          {questions.length === 0 ? (
+            <p className="muted">No questions available</p>
+          ) : (
+            questions.map((q, i) => (
+              <div key={i} className="question-row">
+                <span>{q.text}</span>
+                <button onClick={() => removeQuestion(i)}>Remove</button>
+              </div>
+            ))
           )}
+        </div>
 
-          {/* RATING */}
-          {r.answerType === "rating" && (
-            <div className="rating-stars">
-              {"⭐".repeat(r.ratingValue || 0)}
-            </div>
+        <div className="divider">OR</div>
+
+        {/* ADD QUESTION */}
+        <div className="section add-question-section">
+          <h4>Add New Question</h4>
+          <input
+            placeholder="Enter new question text"
+            value={newQuestion}
+            onChange={(e) => setNewQuestion(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && addQuestion()}
+          />
+          <button onClick={addQuestion}>Add Question</button>
+        </div>
+
+        {/* COMPLAINTS / FEEDBACK RESPONSES */}
+        <div className="section complaints-section">
+          <h4 className="complaints-title">Complaints / Feedback Responses</h4>
+          {complaints.length === 0 ? (
+            <p className="muted">No complaints submitted yet</p>
+          ) : (
+            complaints.map((complaint, idx) => (
+              <div key={complaint._id} className="complaint-box">
+                <h5 className="complaint-header">Complaint #{idx + 1}</h5>
+                {complaint.responses.map((r, qIdx) => (
+                  <div key={qIdx} className="complaint-question">
+                    <p className="question-text">
+                      Q{qIdx + 1}. {questions.find(q => q._id === r.questionId)?.text || "Question"}
+                    </p>
+                    {/* TEXT */}
+                    {r.answerType === "text" && (
+                      <div className="text-answer-box">{r.answerText}</div>
+                    )}
+                    {/* RATING */}
+                    {r.answerType === "rating" && (
+                      <div className="rating-stars">{"⭐".repeat(r.ratingValue || 0)}</div>
+                    )}
+                    {/* IMAGE */}
+                    {r.answerType === "image" && (
+                      <button
+                        className="view-btn"
+                        onClick={() => window.open(`${BACKENDURL}${r.mediaUrl}`, "_blank")}
+                      >
+                        View Image
+                      </button>
+                    )}
+                    {/* VIDEO */}
+                    {r.answerType === "video" && (
+                      <button
+                        className="view-btn"
+                        onClick={() => window.open(`${BACKENDURL}${r.mediaUrl}`, "_blank")}
+                      >
+                        View Video
+                      </button>
+                    )}
+                    {/* AUDIO */}
+                    {r.answerType === "audio" && (
+                      <audio
+                        controls
+                        className="audio-player"
+                        src={`${BACKENDURL}${r.mediaUrl}`}
+                      />
+                    )}
+                  </div>
+                ))}
+                <button
+                  className="delete-complaint-btn"
+                  onClick={() => deleteComplaint(complaint._id)}
+                  title="Delete complaint"
+                >
+                  🗑
+                </button>
+                <p className="created-at">
+                  Created at: {new Date(complaint.createdAt).toLocaleString()}
+                </p>
+              </div>
+            ))
           )}
+        </div>
 
-          {/* IMAGE */}
-          {r.answerType === "image" && (
-            <button
-              className="view-btn"
-              onClick={() => window.open(`${BACKENDURL}${r.mediaUrl}`, "_blank")}
-            >
-              View Image
-            </button>
-          )}
-
-          {/* VIDEO */}
-          {r.answerType === "video" && (
-            <button
-              className="view-btn"
-              onClick={() => window.open(`${BACKENDURL}${r.mediaUrl}`, "_blank")}
-            >
-              View Video
-            </button>
-          )}
-
-          {/* AUDIO */}
-          {r.answerType === "audio" && (
-            <audio
-              controls
-              className="audio-player"
-              src={`${BACKENDURL}${r.mediaUrl}`}
+        {/* TOGGLES */}
+        <div className="section">
+          <div className="toggle-row">
+            <span>Close Feedback Temporarily</span>
+            <input
+              type="checkbox"
+              checked={!isActive}
+              onChange={() => setIsActive(!isActive)}
             />
-          )}
-
+          </div>
         </div>
-      ))}
-  <button
-      className="delete-complaint-btn"
-      onClick={() => deleteComplaint(complaint._id)}
-      title="Delete complaint"
-    >
-      🗑
-    </button>
-      <p className="created-at">
-        Created at: {new Date(complaint.createdAt).toLocaleString()}
-      </p>
 
-    </div>
-  ))
-)}
-
-
-
-      {/* TOGGLES */}
-      <div className="toggle-row">
-        <span>CLOSE FEEDBACK TEMPORARILY</span>
-        <input
-          type="checkbox"
-          checked={!isActive}
-          onChange={() => setIsActive(!isActive)}
-        />
+        {/* ACTIONS */}
+        <div className="section actions-section">
+          <button className="danger" onClick={deleteFeedback}>
+            Delete Whole Feedback
+          </button>
+          <button className="primary" onClick={saveChanges}>
+            Save Changes
+          </button>
+          <button className="secondary" onClick={downloadQR}>
+            Download Feedback QR
+          </button>
+        </div>
+        </div>
       </div>
 
-      {/* ACTIONS */}
-      <button className="danger" onClick={deleteFeedback}>
-        DELETE WHOLE FEEDBACK
-      </button>
-
-      <button className="primary" onClick={saveChanges}>
-        SAVE CHANGES
-      </button>
-
-      <button className="secondary" onClick={downloadQR}>
-        DOWNLOAD FEEDBACK QR
-      </button>
+      <footer className="admin-footer">
+        <p className="admin-footer-text">Powered by PatientTalkback</p>
+      </footer>
     </div>
   );
 }
