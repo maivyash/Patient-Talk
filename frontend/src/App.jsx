@@ -64,10 +64,10 @@ function App() {
         <Route path="/" element={<Home />} />
         {/* <Route path="/hospital/:hospitalId" element={<HospitalLanding />} />
         <Route path="/hospital/:hospitalId/feedback" element={<FeedbackForm />} />
-        <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+        <Route path="/super-admin/login" element={<SuperAdminLogin />} /> */}
         
         <Route path="/super-admin/hospital/:hospitalId/complaints" element={<SuperAdminComplaintBoard />} />
-        <Route path="/super-admin/hospital/:hospitalId/complaints/:categoryId" element={<SuperAdminComplaintList />} /> */}
+        <Route path="/super-admin/hospital/:hospitalId/form/:formId" element={<SuperAdminComplaintList />} /> 
         <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
         <Route path="/login" element={<AdminLogin />} />
         {/* <Route path="/hospital/login" element={<HospitalLogin />} /> */}

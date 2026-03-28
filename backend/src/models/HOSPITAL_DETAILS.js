@@ -39,6 +39,11 @@ const HOSPITAL_DETAILS_Schema = new mongoose.Schema(
       select: true,
     },
 
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
     hospital_logo: {
       data: {
         type: Buffer,

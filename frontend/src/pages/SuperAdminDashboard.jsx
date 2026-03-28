@@ -1,100 +1,195 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import './AdminLayout.css'
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './AdminLayout.css';
 
-const HOSPITALS = [
-  { id: 'boston-memorial', name: 'Boston Memorial Hospital' },
-  { id: 'saint-marys', name: "Saint Mary's Hospital" },
-  { id: 'city-general', name: 'City General Hospital' },
-  { id: 'metro-health', name: 'Metro Health Center' },
-  { id: 'community-care', name: 'Community Care Hospital' },
-]
+const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 export default function SuperAdminDashboard() {
-  const navigate = useNavigate()
-  const [searchQuery, setSearchQuery] = useState('')
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('hospitals'); // 'hospitals' or 'logs'
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const [hospitals, setHospitals] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredHospitals = HOSPITALS.filter((hospital) =>
-    hospital.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const fetchHospitals = async () => {
+    try {
+      const res = await fetch(`${BACKENDURL}/api/superadmin/hospitals`, { credentials: "include" });
+      const data = await res.json();
+      if (data.success) {
+        setHospitals(data.data);
+      } else {
+        if(res.status === 412) navigate("/login");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchLogs = async () => {
+    try {
+      const res = await fetch(`${BACKENDURL}/api/superadmin/logs`, { credentials: "include" });
+      const data = await res.json();
+      if (data.success) setLogs(data.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    const initFetch = async () => {
+      setLoading(true);
+      await fetchHospitals();
+      await fetchLogs();
+      setLoading(false);
+    };
+    initFetch();
+  }, [navigate]);
+
+  const toggleHospitalStatus = async (id, currentStatus) => {
+    try {
+      const res = await fetch(`${BACKENDURL}/api/superadmin/hospitals/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ isActive: !currentStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchHospitals(); // refresh
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const [selectedHospital, setSelectedHospital] = useState(null);
+
+  const filteredHospitals = hospitals.filter((h) => 
+    h.hospital_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    h.location?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="admin-page">
+    <div className="admin-page" style={{ background: '#9ed6df' }}>
       {/* Navbar */}
       <nav className="admin-navbar">
         <div className="admin-nav-left"></div>
         <div className="admin-nav-center">
           <div className="admin-brand">
-            <span className="admin-brand-icon-svg">
-              <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="12,5 14.5,9.5 20,10.5 16,14.5 17.5,20 12,17.5 6.5,20 8,14.5 4,10.5 9.5,9.5" fill="#e00000" />
-                <path d="M12 2 A10 10 0 0 1 21.5 8 L18.5 8 L22.5 13 L23.5 7 L20.5 7 A11.5 11.5 0 0 0 12 0.5 Z" fill="#f09b50" />
-                <path d="M12 22 A10 10 0 0 1 2.5 16 L5.5 16 L1.5 11 L0.5 17 L3.5 17 A11.5 11.5 0 0 0 12 23.5 Z" fill="#f09b50" />
-              </svg>
+            <span className="admin-brand-icon-svg" style={{ fontSize: '24px', color: '#ffeb3b', textShadow: '0 0 5px rgba(0,0,0,0.2)' }}>
+              ★
             </span>
-            <span className="admin-brand-name">PatientTalkback</span>
+            <span className="admin-brand-name" style={{ color: '#000', fontWeight: 'bold' }}>Patienttalkback.com</span>
           </div>
         </div>
         <div className="admin-nav-right">
-          <div className="admin-header-badge" style={{ margin: 0 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-            Super Admin
-          </div>
+          <button style={{ 
+            background: '#333', color: '#fff', border: 'none', padding: '6px 16px', borderRadius: '4px', cursor: 'pointer' 
+          }} onClick={() => navigate('/login')}>Logout</button>
         </div>
       </nav>
 
-      <div className="admin-content admin-content--wide">
-        <div className="admin-page-header">
-          <div className="admin-header-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
-            Hospital Directory
-          </div>
-          <h1 className="admin-page-title">List of Hospitals</h1>
-          <p className="admin-page-subtitle">Manage and view all registered hospitals</p>
+      <div className="admin-content admin-content--wide" style={{ maxWidth: '800px', margin: '0 auto', paddingTop: '20px' }}>
+        
+        {/* Tab Selection */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <button 
+            style={{ flex: 1, padding: '12px', background: activeTab === 'hospitals' ? '#1c6e73' : 'rgba(255,255,255,0.6)', color: activeTab === 'hospitals' ? '#fff' : '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+            onClick={() => setActiveTab('hospitals')}>
+            List of Hospitals
+          </button>
+          <button 
+            style={{ flex: 1, padding: '12px', background: activeTab === 'logs' ? '#1c6e73' : 'rgba(255,255,255,0.6)', color: activeTab === 'logs' ? '#fff' : '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+            onClick={() => setActiveTab('logs')}>
+            System Logs
+          </button>
         </div>
 
-        {/* Search */}
-        <div className="admin-glass-card" style={{ padding: '16px 20px', marginBottom: '24px' }}>
-          <input
-            type="text"
-            placeholder="Search by Name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              borderRadius: '12px',
-              border: '1px solid rgba(28,110,115,0.12)',
-              outline: 'none',
-              fontSize: '15px',
-              background: 'rgba(255,255,255,0.6)',
-              color: 'var(--text-main, #0b1c28)',
-              fontFamily: 'inherit'
-            }}
-          />
-        </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px' }}>Loading...</div>
+        ) : (
+          <>
+            {activeTab === 'hospitals' && (
+              <div>
+                <input
+                  type="text"
+                  placeholder="Search by Name or City/Location"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ width: '100%', padding: '12px', marginBottom: '20px', border: 'none', background: 'rgba(255,255,255,0.8)', textAlign: 'center', borderRadius: '4px' }}
+                />
 
-        {/* Hospital List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {filteredHospitals.map((hospital) => (
-            <div key={hospital.id} className="admin-glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-              <div style={{ fontWeight: 600, fontSize: '16px', color: 'var(--text-main)' }}>{hospital.name}</div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <button className="admin-back-btn" style={{ transform: 'none' }}
-                  onClick={() => navigate(`/super-admin/hospital/${hospital.id}/feedbacks`)}
-                >View Feedbacks</button>
-                <button className="admin-back-btn" style={{ transform: 'none' }}
-                  onClick={() => navigate(`/super-admin/hospital/${hospital.id}/complaints`)}
-                >All Forms</button>
+                {selectedHospital && (
+                  <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', marginBottom: '20px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', position: 'relative' }}>
+                    <button 
+                      onClick={() => setSelectedHospital(null)} 
+                      style={{ position: 'absolute', top: '10px', right: '10px', background: 'transparent', border: 'none', fontSize: '18px', cursor: 'pointer' }}
+                    >✖</button>
+                    <h3 style={{ marginTop: 0 }}>Hospital Details</h3>
+                    <p><strong>Name:</strong> {selectedHospital.hospital_name}</p>
+                    <p><strong>Email:</strong> {selectedHospital.hospital_email}</p>
+                    <p><strong>Phone:</strong> {selectedHospital.hospital_phno}</p>
+                    <p><strong>Location:</strong> {selectedHospital.location}</p>
+                    <p><strong>Status:</strong> {selectedHospital.isActive ? 'Active' : 'Deactivated'}</p>
+                    <p><strong>Created At:</strong> {new Date(selectedHospital.createdAt).toLocaleString()}</p>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {filteredHospitals.map(h => (
+                    <div key={h._id} style={{ background: 'rgba(255,255,255,0.6)', padding: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: h.isActive ? 1 : 0.6, borderRadius: '8px' }}>
+                      <h3 
+                        style={{ margin: '0 0 10px 0', fontSize: '18px', cursor: 'pointer', textDecoration: 'underline', color: '#1c6e73' }}
+                        onClick={() => setSelectedHospital(h)}
+                        title="View details"
+                      >
+                        {h.hospital_name} {h.isActive === false && '(Deactivated)'}
+                      </h3>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <button 
+                          style={{ background: '#455a64', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', fontSize: '12px', borderRadius: '4px' }}
+                          onClick={() => navigate(`/super-admin/hospital/${h._id}/complaints`)}
+                        >View Feedback Forms</button>
+                        <button 
+                          style={{ background: h.isActive ? '#d32f2f' : '#388e3c', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', fontSize: '12px', borderRadius: '4px' }}
+                          onClick={() => toggleHospitalStatus(h._id, h.isActive)}
+                        >{h.isActive ? 'Deactivate' : 'Activate'}</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+            )}
 
-      <footer className="admin-footer">
-        <p className="admin-footer-text">Powered by PatientTalkback</p>
-      </footer>
+            {activeTab === 'logs' && (
+              <div style={{ background: 'rgba(255,255,255,0.9)', padding: '20px', borderRadius: '8px' }}>
+                <h3 style={{ marginTop: 0 }}>System Logs</h3>
+                <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                  {logs.length === 0 ? <p>No logs found.</p> : null}
+                  {logs.map((log, idx) => (
+                    <div key={idx} style={{ borderBottom: '1px solid #ccc', padding: '10px 0', fontSize: '14px' }}>
+                      <div style={{ fontWeight: 'bold', color: '#1c6e73' }}>
+                        {new Date(log.timestamp).toLocaleString()} - [{log.type}]
+                      </div>
+                      <div style={{ color: '#333' }}>
+                        {log.type === 'LOGIN' && `Hospital ${log.hospital_name || log.hospital_email} logged in.`}
+                        {log.type === 'REGISTRATION' && `New hospital "${log.hospital_name}" registered.`}
+                        {log.type === 'FORM_CREATED' && `Feedback form "${log.department_name}" created.`}
+                        {log.type === 'FORM_EDITED' && `Feedback form ${log.feedbackId} edited.`}
+                        {log.type === 'FEEDBACK_SUBMISSION' && `Feedback submitted for form ${log.feedbackId}.`}
+                        {log.type === 'FEEDBACK_DELETED' && `Feedback form deleted.`}
+                        {log.type === 'ERROR' && `Error: ${log.message}`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
-  )
+  );
 }

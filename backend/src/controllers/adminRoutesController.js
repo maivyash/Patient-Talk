@@ -7,6 +7,7 @@ const { generateFeedbackQR } = require("../helpers/QRgenerator");
 const FEEDBACK_RESPONSE = require("../models/FeedbackResponses");
 const FEEDBACK_PERSON = require("../models/ContactPerson");
 const authMiddleware = require("../middleware/auth");
+const { logFormCreated, logFormEdited, logFeedbackDeleted, logError } = require("../helpers/logger");
 
 
 
@@ -14,7 +15,7 @@ async function getFeedbacksByHospital(req, res) {
   try {
     const feedbacks = await FEEDBACK.find({
       hospitalId: req.hospitalId,
-      isActive: true,
+      isDeleted: false,
     });
 
     return res.json({
@@ -22,8 +23,9 @@ async function getFeedbacksByHospital(req, res) {
       data: feedbacks,
     });
   } catch (err) {
-    return res.status(500).json({ message: "Server error" });
     console.error("Error fetching feedbacks:", err);
+    logError({ message: err.message, stack: err.stack, context: "getFeedbacksByHospital" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -53,6 +55,7 @@ async function getHospitalProfile(req, res) {
     });
   } catch (err) {
     console.error("Error fetching hospital profile:", err);
+    logError({ message: err.message, stack: err.stack, context: "getHospitalProfile" });
     return res.status(500).json({ message: "Server error" });
 
   }
@@ -80,6 +83,7 @@ async function changeHospitalName(req, res) {
     });
   } catch (err) {
     console.error("Error updating hospital name:", err);
+    logError({ message: err.message, stack: err.stack, context: "changeHospitalName" });
     return res.status(500).json({ message: "Server error" });
   }
 }
@@ -110,6 +114,8 @@ async function createFeedback(req, res) {
       isActive: true,
     });
 
+    logFormCreated({ feedbackId: feedback._id, hospitalId: req.hospitalId, department_name });
+
     return res.status(201).json({
       success: true,
       message: "Feedback created successfully",
@@ -117,6 +123,7 @@ async function createFeedback(req, res) {
     });
   } catch (err) {
     console.error(err);
+    logError({ message: err.message, stack: err.stack, context: "createFeedback" });
     return res.status(500).json({ message: "Server error" });
   }
 }
@@ -126,6 +133,7 @@ async function getFeedbackById(req, res) {    // GET /admin/getfeedbackform/:id
   const feedback = await FEEDBACK.findOne({
     _id: req.params.id,
     hospitalId: req.hospitalId,
+    isDeleted: false,
   });
 
   if (!feedback) {
@@ -139,27 +147,60 @@ async function getFeedbackById(req, res) {    // GET /admin/getfeedbackform/:id
 
 async function updateFeedbackById(req, res) {  // PUT /admin/feedback/:id
   //update feedback by Feedback ID and hospital ID, return 404 if not found
-  const { questions, isActive } = req.body;
-
-  await FEEDBACK.updateOne(
-    { _id: req.params.id, hospitalId: req.hospitalId },
-    { $set: { questions, isActive } }
-  );
-
-  res.status(200).json({ success: true });
-
-}
-async function deleteFeedbackById(req, res) {  // DELETE /admin/feedback/:id
-  //delete feedback by Feedback ID and hospital ID, return 404 if not found
   try {
-    await FEEDBACK.deleteOne(
-      { _id: req.params.id, hospitalId: req.hospitalId }
+    const { questions, isActive } = req.body;
+
+    await FEEDBACK.updateOne(
+      { _id: req.params.id, hospitalId: req.hospitalId },
+      { $set: { questions, isActive } }
     );
 
+    logFormEdited({ feedbackId: req.params.id, hospitalId: req.hospitalId });
 
     res.status(200).json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Error deleting feedback" });
+    logError({ message: err.message, stack: err.stack, context: "updateFeedbackById" });
+    res.status(500).json({ success: false, message: "Error updating feedback" });
+  }
+}
+async function deleteFeedbackById(req, res) {
+  try {
+    const result = await FEEDBACK.findOneAndUpdate(
+      { _id: req.params.id, hospitalId: req.hospitalId },
+      { $set: { isDeleted: true } },
+      { new: true } // returns updated document
+    );
+
+    // If not found
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Feedback not found",
+      });
+    }
+
+    logFeedbackDeleted({
+      feedbackId: req.params.id,
+      hospitalId: req.hospitalId,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Feedback marked as deleted",
+      data: result,
+    });
+
+  } catch (err) {
+    logError({
+      message: err.message,
+      stack: err.stack,
+      context: "deleteFeedbackById",
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Error deleting feedback",
+    });
   }
 }
 
@@ -168,6 +209,7 @@ async function getFeedbackQR(req, res) {
   const feedback = await FEEDBACK.findOne({
     _id: req.params.id,
     hospitalId: req.hospitalId,
+    isDeleted: false,
   });
 
   if (!feedback) {
@@ -195,6 +237,7 @@ async function getFeedbackResponses(req, res, next) {
     const responses = await FEEDBACK_RESPONSE.find({
       feedbackId,
       hospitalId,
+      isDeleted: false,
     }).sort({ createdAt: -1 });
 
     if (!responses || responses.length === 0) {
@@ -210,28 +253,53 @@ async function getFeedbackResponses(req, res, next) {
     });
   } catch (err) {
     console.log(err);
+    logError({ message: err.message, stack: err.stack, context: "getFeedbackResponses" });
     // 👈 IMPORTANT
   }
 }
-
 
 async function DeleteResponseById(req, res) {
   try {
     const responseId = req.params.id;
     const hospitalId = req.hospitalId;
 
-    await FEEDBACK_RESPONSE.deleteOne({
-      _id: responseId,
-      hospitalId,
-    });
+    const result = await FEEDBACK_RESPONSE.findOneAndUpdate(
+      { _id: responseId, hospitalId, isDeleted: false }, // prevent double delete
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: new Date(),
+        },
+      },
+      { new: true }
+    );
+
+    // If not found
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Response not found or already deleted",
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: "Response deleted successfully",
+      message: "Response marked as deleted",
+      data: result,
     });
+
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ success: false, message: "Error deleting response" });
+    logError({
+      message: err.message,
+      stack: err.stack,
+      context: "DeleteResponseById",
+    });
+
+    return res.status(500).json({
+      success: false,
+      message: "Error deleting response",
+    });
   }
 }
 async function addFeedbackPerson(req, res) {
@@ -267,6 +335,7 @@ async function addFeedbackPerson(req, res) {
       data: person,
     });
   } catch (err) {
+    logError({ message: err.message, stack: err.stack, context: "addFeedbackPerson" });
     res.status(500).json({ success: false });
   }
 }
@@ -291,7 +360,7 @@ async function assignFeedbackPerson(req, res) {
     const { feedbackId, personId, assign } = req.body;
     const hospitalId = req.hospitalId;
 
-    const feedback = await FEEDBACK.findOne({ _id: feedbackId, hospitalId });
+    const feedback = await FEEDBACK.findOne({ _id: feedbackId, hospitalId, isDeleted: false });
     const person = await FEEDBACK_PERSON.findOne({ _id: personId, hospitalId });
 
     if (!feedback || !person) {
@@ -334,6 +403,7 @@ async function assignFeedbackPerson(req, res) {
     res.json({ success: true });
   } catch (err) {
     console.error(err);
+    logError({ message: err.message, stack: err.stack, context: "assignFeedbackPerson" });
     res.status(500).json({ success: false });
   }
 }
@@ -365,6 +435,7 @@ async function changeTheme(req, res) {
     });
   } catch (err) {
     console.error("Error updating theme:", err);
+    logError({ message: err.message, stack: err.stack, context: "changeTheme" });
     return res.status(500).json({
       success: false,
       message: "Server error",

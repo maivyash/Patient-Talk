@@ -10,6 +10,7 @@ const UserRouter = require("./src/routes/userRoutes");
 
 
 const adminRoutes = require("./src/routes/adminRoutes");
+const superAdminRoutes = require("./src/routes/superAdminRoutes");
 const { notFoundHandler, errorHandler } = require("./src/middleware/errorHandler");
 const cookieParser = require("cookie-parser");
 
@@ -38,6 +39,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/logo", logoRoutes);
 app.use("/api/user", UserRouter);
+app.use("/api/superadmin", superAdminRoutes);
 
 
 

@@ -276,8 +276,10 @@ export default function SecureFeedbackView() {
               </div>
 
               {/* Question Text */}
-              {questionMap[ans.questionId] && (
-                <p className="sfv-question-text">{questionMap[ans.questionId]}</p>
+              { (questionMap[ans.questionId] || ans.questionText) ? (
+                <p className="sfv-question-text">{questionMap[ans.questionId] || ans.questionText}</p>
+              ) : (
+                <p className="sfv-question-text" style={{ fontStyle: "italic", color: "#888" }}>Unknown Question</p>
               )}
 
               {/* TEXT */}
