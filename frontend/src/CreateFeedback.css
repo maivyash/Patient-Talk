@@ -88,6 +88,7 @@
   background: var(--primary-color, #1c6e73);
   color: white;
   padding: 12px 24px;
+  
   border: none;
   border-radius: 8px;
   cursor: pointer;

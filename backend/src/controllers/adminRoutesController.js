@@ -31,7 +31,7 @@ async function getFeedbacksByHospital(req, res) {
 
 async function getHospitalProfile(req, res) {
   try {
-    const hospitalProfile = await HOSPITAL_DETAILS.findById(req.hospitalId).select("+hospital_logo +hospital_name");
+    const hospitalProfile = await HOSPITAL_DETAILS.findById(req.hospitalId).select("+hospital_logo +hospital_name +adminColor +userColor +location");
     if (!hospitalProfile) {
       return res.status(404).json({ success: false, message: "Hospital profile not found" });
     }
@@ -51,7 +51,7 @@ async function getHospitalProfile(req, res) {
     }
     return res.json({
       success: true,
-      data: { hospital_name: hospitalProfile.hospital_name, hospital_logo: logoBase64 },
+      data: { hospital_name: hospitalProfile.hospital_name, hospital_logo: logoBase64, adminColor: hospitalProfile.adminColor, userColor: hospitalProfile.userColor },
     });
   } catch (err) {
     console.error("Error fetching hospital profile:", err);
@@ -420,7 +420,7 @@ async function changeTheme(req, res) {
       });
     }
 
-    await HOSPITAL_DETAILS.findByIdAndUpdate(
+    const updated = await HOSPITAL_DETAILS.findByIdAndUpdate(
       req.hospitalId,
       {
         adminColor: primaryColor,
@@ -428,7 +428,7 @@ async function changeTheme(req, res) {
       },
       { new: true }
     );
-
+    console.log("UPDATED DOC:", updated);
     return res.status(200).json({
       success: true,
       message: "Theme updated successfully",

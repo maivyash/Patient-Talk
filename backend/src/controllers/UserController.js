@@ -11,7 +11,7 @@ async function getFeedbackByIdforUser(req, res) {
         _id: req.params.id,
         isActive: true,
         isDeleted: false,
-    }).select("feedback_name questions logo_png hospitalId");
+    }).select("+feedback_name +questions +logo_png +hospitalId +adminColor +userColor");
 
     if (!feedback) {
         return res.status(404).json({
@@ -127,7 +127,7 @@ async function getHospitalAllFeedbackByIdforUser(req, res) {
 
 async function getHospitalProfileForUser(req, res) {
     try {
-        const hospitalProfile = await HOSPITAL_DETAILS.findById(req.params.id).select("+hospital_logo +hospital_name");
+        const hospitalProfile = await HOSPITAL_DETAILS.findById(req.params.id).select("+hospital_logo +hospital_name +adminColor +userColor");
         if (!hospitalProfile) {
             return res.status(404).json({ success: false, message: "Hospital profile not found" });
         }
@@ -147,7 +147,7 @@ async function getHospitalProfileForUser(req, res) {
         }
         return res.json({
             success: true,
-            data: { hospital_name: hospitalProfile.hospital_name, hospital_logo: logoBase64 },
+            data: { hospital_name: hospitalProfile.hospital_name, hospital_logo: logoBase64, adminColor: hospitalProfile.adminColor, userColor: hospitalProfile.userColor },
         });
     } catch (err) {
         console.error("Error fetching hospital profile:", err);

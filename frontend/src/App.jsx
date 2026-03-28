@@ -35,6 +35,12 @@ function App() {
   useEffect(() => {
     // Load theme on app start
     const loadTheme = async () => {
+      const hasCookie = document.cookie && document.cookie.length > 0;
+
+      if (!hasCookie) {
+        
+        return;
+      }
       try {
         const res = await fetch(`${BACKENDURL}/api/admin/hospital/profile`, {
           credentials: "include",
@@ -52,6 +58,7 @@ function App() {
           document.body.style.background = secondary;
         }
       } catch (err) {
+       
         console.log("Theme not loaded (user not authenticated)");
       }
     };

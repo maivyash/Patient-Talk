@@ -343,6 +343,7 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
   );
 }
 
+
 // ─── Main FeedbackResponse Component ───
 export default function FeedbackResponse() {
   const navigate = useNavigate();
@@ -364,20 +365,47 @@ export default function FeedbackResponse() {
     setLoading(false);
   }, [id]);
 
-  // Load hospital-specific theme
+
   useEffect(() => {
     if (!feedback?.hospitalId) return;
     fetch(`${BACKENDURL}/api/user/getHospitalProfileForUser/${feedback.hospitalId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          const primary = data.data.adminColor || "#1c6e73";
-          const secondary = data.data.userColor || "#9ed6df";
+          const primary = data.data.adminColor ;
+          const secondary = data.data.userColor ;
           document.documentElement.style.setProperty('--primary-color', primary);
           document.documentElement.style.setProperty('--secondary-color', secondary);
+
+          console.log("PRIMARY:", primary);
+          console.log("SECONDARY:", secondary);
         }
+
+
       });
   }, [feedback?.hospitalId]);
+
+
+
+
+    // Load hospital-specific theme
+useEffect(() => {
+  const loadHospitalTheme = async () => {
+
+    if (!feedback?.hospitalId) return;
+    const res = await fetch(`${BACKENDURL}/api/user/getHospitalProfileForUser/${feedback?.hospitalId}`, {
+      
+    });
+    const data = await res.json();
+    if (data.success) {
+      const primary = data.data.adminColor || "#1c6e73";
+      const secondary = data.data.userColor || "#9ed6df";
+      document.documentElement.style.setProperty('--primary-color', primary);
+      document.documentElement.style.setProperty('--secondary-color', secondary);
+    }
+  };
+  loadHospitalTheme();
+}, [feedback?.hospitalId]);
 
   // Handle answer change
   const handleAnswerChange = useCallback((qid, answerData) => {

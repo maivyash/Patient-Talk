@@ -29,7 +29,6 @@ export default function AdminDashboard() {
   );
 
 
-
   const handleLogout = async () => {
     try {
       await fetch(`${BACKENDURL}/api/auth/logout`, {
@@ -69,6 +68,11 @@ export default function AdminDashboard() {
         if (data.success) {
           setHospitalName(data.data.hospital_name);
           setHospitalLogo(data.data.hospital_logo);
+          const primary = data.data.adminColor || "#1c6e73";
+          const secondary = data.data.userColor || "#9ed6df";
+          document.documentElement.style.setProperty('--primary-color', primary);
+          document.documentElement.style.setProperty('--secondary-color', secondary);
+          
         }
       });
   }, []);

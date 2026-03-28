@@ -64,12 +64,12 @@ const HOSPITAL_DETAILS_Schema = new mongoose.Schema(
     },
      userColor: {
       type: String,
-      default: "#FFFFFF",
+      default: "#94D8E2",
     },
 
     adminColor: {
       type: String,
-      default: "#FFFFFF",
+      default: "#94D8E2",
     },
   },
   { timestamps: true, collection: "HOSPITAL_DETAILS" }
