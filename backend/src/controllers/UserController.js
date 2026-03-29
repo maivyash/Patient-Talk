@@ -114,7 +114,7 @@ async function getHospitalAllFeedbackByIdforUser(req, res) {
 
 async function getHospitalProfileForUser(req, res) {
   try {
-      const hospitalProfile = await HOSPITAL_DETAILS.findById(req.params.id).select("+hospital_logo +hospital_name");
+      const hospitalProfile = await HOSPITAL_DETAILS.findById(req.params.id).select("+hospital_logo +hospital_name +adminColor +userColor");
       if (!hospitalProfile) {
         return res.status(404).json({ success: false, message: "Hospital profile not found" });
       }
@@ -134,7 +134,12 @@ async function getHospitalProfileForUser(req, res) {
       }
       return res.json({
         success: true,
-        data: { hospital_name: hospitalProfile.hospital_name, hospital_logo: logoBase64 },
+        data: {
+          hospital_name: hospitalProfile.hospital_name,
+          hospital_logo: logoBase64,
+          adminColor: hospitalProfile.adminColor || "#1c6e73",
+          userColor: hospitalProfile.userColor || "#9ed6df",
+        },
       });
     } catch (err) {
       console.error("Error fetching hospital profile:", err);
@@ -150,7 +155,9 @@ async function getFeedbackResponseByToken(req, res) {
     const response = await FEEDBACK_RESPONSE.findOne({
       accessToken: token,
       tokenExpiresAt: { $gt: new Date() }, // check token validity
-    });
+    })
+      .populate("feedbackId", "feedback_name questions")
+      .populate("hospitalId", "adminColor userColor");
 
     if (!response) {
       return res.status(410).json({

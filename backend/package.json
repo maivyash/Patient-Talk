@@ -6,6 +6,7 @@
   "author": "",
   "type": "commonjs",
   "main": "server.js",
+  "proxy": "http://localhost:5173",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
