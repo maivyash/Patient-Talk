@@ -37,6 +37,7 @@ const responseSchema = new mongoose.Schema({
   ratingValue: Number,       // rating
   mediaUrl: String,          // audio/video/img
   selectedOption: String,    // radio
+  questionText: String,      // snapshot of the question at submission
 });
 
 const feedbackResponseSchema = new mongoose.Schema(
@@ -70,6 +71,10 @@ const feedbackResponseSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );
@@ -86,7 +91,7 @@ const { generateFeedbackAccessToken } = require("../helpers/feedbackmailaccessto
 
 feedbackResponseSchema.post("save", async function (doc) {
   console.log("SENDING MAIL...........!");
-  
+
   try {
     const feedback = await FEEDBACK.findById(doc.feedbackId)
       .populate("assignedTo");
@@ -103,9 +108,9 @@ feedbackResponseSchema.post("save", async function (doc) {
     // const token = generateFeedbackAccessToken({
     //   feedbackId: feedback._id,
     //   emails,
-     
+
     // });
-    const token=doc.accessToken;
+    const token = doc.accessToken;
 
     const link = `${process.env.FRONTEND_URL}/mailPerson/getFeedbackResponsesByToken/${token}`;
 
@@ -124,9 +129,9 @@ feedbackResponseSchema.post("save", async function (doc) {
       </p>
     `;
 
-     await sendMail({
-       to: emails,
-       subject: "📩 New Patient Feedback Received",
+    await sendMail({
+      to: emails,
+      subject: "📩 New Patient Feedback Received",
       html,
     });
 

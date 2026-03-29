@@ -30,10 +30,6 @@
   font-size: 32px;
   font-weight: 700;
   margin-bottom: 12px;
-  background: var(--secondary-color);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .theme-description {
@@ -350,7 +346,7 @@
 
 .preview-btn.primary {
   background: var(--primary-color, #1c6e73);
-  color: white;
+  color: var(--btn-text, #ffffff);
 }
 
 .preview-btn.primary:hover {
@@ -418,8 +414,8 @@
   flex: 1;
   max-width: 200px;
   padding: 16px 24px;
-  background: var(--secondary-color);
-  color: white;
+  background: var(--primary-color, #1c6e73);
+  color: var(--btn-text, #ffffff);
   border: none;
   border-radius: 12px;
   cursor: pointer;

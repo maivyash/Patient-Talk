@@ -88,6 +88,7 @@
   background: var(--primary-color, #1c6e73);
   color: white;
   padding: 12px 24px;
+
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -130,7 +131,7 @@
 }
 
 .submit-btn {
-  background: var(--secondary-color);
+  background: var(--primary-color);
   color: white;
   padding: 16px;
   border: none;
@@ -184,5 +185,3 @@
     font-size: 20px;
   }
 }
-
-

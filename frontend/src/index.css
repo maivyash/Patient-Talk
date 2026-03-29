@@ -3,7 +3,7 @@
 :root {
   /* Core Variables preset (backend overrides these dynamically) */
   --primary-color: #1c6e73;
-  --secondary-color: #9ed6df;
+  --secondary-color: #ffffff;
   
   /* Additional Premium Variables */
   --surface-color: #ffffff;
@@ -50,8 +50,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  /* Solid background as requested */
-  background: var(--secondary-color);
+  /* White background by default, specific pages will override */
+  background: #ffffff;
   background-attachment: fixed;
   color: var(--text-main);
 }

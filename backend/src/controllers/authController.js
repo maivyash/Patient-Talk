@@ -47,7 +47,7 @@ async function signup(req, res, next) {
       !hospital_email ||
       !hospital_phno ||
       !hospital_password ||
-      !hospital_logo||
+      !hospital_logo ||
       !location
     ) {
       return res.status(401).json({
@@ -115,7 +115,7 @@ async function signup(req, res, next) {
       hospital_name,
       hospital_email,
       hospital_phno,
-      User_role:false,
+      User_role: false,
       hospital_password: hashedPassword,
       hospital_logo: {
         data: logoBuffer,
@@ -134,12 +134,12 @@ async function signup(req, res, next) {
       hospital_email: hospital.hospital_email,
       hospital_name: hospital.hospital_name,
     });
-res.cookie("token", token, {
-  httpOnly: true,      // 🔐 secure from XSS
-  secure: false,       // ❗ localhost only (true in prod)
-  sameSite: "lax",     // works with localhost
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-});
+    res.cookie("token", token, {
+      httpOnly: true,      // 🔐 secure from XSS
+      secure: false,       // ❗ localhost only (true in prod)
+      sameSite: "lax",     // works with localhost
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
 
 
@@ -185,13 +185,20 @@ async function login(req, res, next) {
     }
 
     const hospital = await HOSPITAL_DETAILS.findOne({ hospital_email }).select(
-      "+hospital_password +User_role"
+      "+hospital_password +User_role +isActive"
     );
 
     if (!hospital) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
+      });
+    }
+
+    if (hospital.isActive === false) {
+      return res.status(403).json({
+        success: false,
+        message: "Your hospital account has been deactivated by the Super Admin. \n Please contact (superadmin@gmail.com)",
       });
     }
 
@@ -207,9 +214,9 @@ async function login(req, res, next) {
         message: "Invalid email or password",
       });
     }
-    
 
-  
+
+
     const token = signToken({
       id: hospital._id.toString(),
       email: hospital.hospital_email,
@@ -219,12 +226,12 @@ async function login(req, res, next) {
       hospitalId: hospital._id.toString(),
       hospital_email: hospital.hospital_email,
     });
-res.cookie("token", token, {
-  httpOnly: true,      // 🔐 secure from XSS
-  secure: false,       // ❗ localhost only (true in prod)
-  sameSite: "lax",     // works with localhost
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-});
+    res.cookie("token", token, {
+      httpOnly: true,      // 🔐 secure from XSS
+      secure: false,       // ❗ localhost only (true in prod)
+      sameSite: "lax",     // works with localhost
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -244,7 +251,7 @@ res.cookie("token", token, {
 
 
 async function superadminLogin(req, res, next) {
-    try {
+  try {
     const { hospital_email, hospital_password } = req.body || {};
 
     if (!hospital_email || !hospital_password) {
@@ -262,34 +269,42 @@ async function superadminLogin(req, res, next) {
 
     }
     //FINDING SUPER ADMIN IN DB
-  const ADMIN = await SUPER_ADMIN.findOne({
-  email: hospital_email,
-}).select("+pass");
+    const ADMIN = await SUPER_ADMIN.findOne({
+      email: hospital_email,
+    });
+
+
+
+
+
 
     //if nom user is present
     if (!ADMIN) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password",
+        message: `Invalid email or password==`,
+
+        //CODE IS RETUNING INI THIS IF
       });
     }
-    if(ADMIN.pass != hospital_password){
+
+    if (ADMIN.pass != hospital_password) {
       return res.status(401).json({
         success: false,
-        message: `${ADMIN.pass} ${hospital_password} Invalid email or password`,
+        message: `Invalid email or password`,
       });
     }
-    if(ADMIN.pass === hospital_password){
+    if (ADMIN.pass === hospital_password) {
       const token = signToken({
         id: ADMIN._id.toString(),
         email: ADMIN.hospital_email,
       });
       res.cookie("token", token, {
-  httpOnly: true,      // 🔐 secure from XSS
-  secure: false,       // ❗ localhost only (true in prod)
-  sameSite: "lax",     // works with localhost
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-});
+        httpOnly: true,      // 🔐 secure from XSS
+        secure: false,       // ❗ localhost only (true in prod)
+        sameSite: "lax",     // works with localhost
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
       return res.status(200).json({
         success: true,
         message: "Super Admin login successful",
@@ -297,17 +312,17 @@ async function superadminLogin(req, res, next) {
       });
     }
   } catch (err) {
-    return next(err); 
-  }finally {
-    
+    return next(err);
+  } finally {
+
     return;
   }
 
 }
 
-async function logout(req, res,next) {
-  res.clearCookie("token", { 
-    httpOnly: true, 
+async function logout(req, res, next) {
+  res.clearCookie("token", {
+    httpOnly: true,
     secure: false,
     sameSite: "lax",
   });

@@ -1,7 +1,6 @@
 .login-page {
   min-height: 100vh;
-  /* Use solid color per request */
-  background: var(--secondary-color);
+  background: #9ed6df !important;
   display: flex;
   flex-direction: column;
   align-items: center;

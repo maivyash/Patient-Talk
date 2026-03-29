@@ -36,27 +36,31 @@ const feedbackSchema = new mongoose.Schema(
 
     questions: {
       type: [questionSchema], // 🔥 ARRAY OF QUESTIONS
-      
+
       required: true,
     },
 
     logo_png: {
       type: String, // base64 / URL
-      
-      required:true
+
+      required: true
     },
 
     isActive: {
       type: Boolean,
       default: true,
     },
-// In FEEDBACK_RESPONSE schema
-assignedTo: [
-  {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "FEEDBACK_PERSON",
-  }
-],
+    isDeleted: {
+      type: Boolean,
+      default: false
+    },
+    // In FEEDBACK_RESPONSE schema
+    assignedTo: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "FEEDBACK_PERSON",
+      }
+    ],
 
   },
   {

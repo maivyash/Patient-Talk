@@ -256,7 +256,7 @@
 }
 
 .primary {
-  background: var(--secondary-color);
+  background: var(--primary-color);
   color: white;
   padding: 16px;
   border: none;

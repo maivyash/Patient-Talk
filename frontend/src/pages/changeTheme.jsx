@@ -31,11 +31,14 @@ export default function ChangeTheme() {
           credentials: "include",
         });
         const data = await res.json();
+        console.log("DATA:", data);
         if (data.success) {
           setColors({
             primaryColor: data.data.adminColor || "#1c6e73",
             secondaryColor: data.data.userColor || "#9ed6df",
           });
+          console.log("PRIMARY:", data.data.adminColor);
+          console.log("SECONDARY:", data.data.userColor);
           // Apply current theme to the page
           applyTheme(data.data.adminColor || "#1c6e73", data.data.userColor || "#9ed6df");
         }
@@ -48,55 +51,47 @@ export default function ChangeTheme() {
     loadCurrentTheme();
   }, []);
 
+  const getContrastColor = (hex) => {
+    if (!hex) return "#ffffff";
+    const color = hex.replace("#", "");
+    const r = parseInt(color.substring(0, 2), 16);
+    const g = parseInt(color.substring(2, 4), 16);
+    const b = parseInt(color.substring(4, 6), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? "#0b1c28" : "#ffffff";
+  };
+
   const handleChange = (key, value) => {
-    setColors((prev) => ({
-      ...prev,
+    const newColors = {
+      ...colors,
       [key]: value,
-    }));
+    };
+    setColors(newColors);
     // Apply changes immediately for preview
-    applyTheme(
-      key === "primaryColor" ? value : colors.primaryColor,
-      key === "secondaryColor" ? value : colors.secondaryColor
-    );
+    applyTheme(newColors.primaryColor, newColors.secondaryColor);
   };
 
   const applyTheme = (primary, secondary) => {
+    const contrastText = getContrastColor(secondary);
+    const btnText = getContrastColor(primary);
+    const isDark = contrastText === "#ffffff";
+
     // Apply theme to CSS custom properties
-    document.documentElement.style.setProperty('--primary-color', primary);
-    document.documentElement.style.setProperty('--secondary-color', secondary);
-    
+    document.documentElement.style.setProperty("--primary-color", primary);
+    document.documentElement.style.setProperty("--secondary-color", secondary);
+    document.documentElement.style.setProperty("--text-main", contrastText);
+    document.documentElement.style.setProperty("--btn-text", btnText);
+    document.documentElement.style.setProperty(
+      "--glass-bg",
+      isDark ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.75)"
+    );
+    document.documentElement.style.setProperty(
+      "--glass-border",
+      isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.8)"
+    );
+
     // Update body background
     document.body.style.background = secondary;
-    
-    // Update all elements that use these colors
-    const primaryElements = document.querySelectorAll('.brand, .page-title, h2, h3, .menu-icon, .star');
-    primaryElements.forEach(el => {
-      el.style.color = primary;
-    });
-    
-    const secondaryElements = document.querySelectorAll('.admin-feedback-page, .edit-feedback-page, .create-feedback-page, .admin-assign-page');
-    secondaryElements.forEach(el => {
-      el.style.background = secondary;
-    });
-    
-    // Update buttons
-    const buttons = document.querySelectorAll('.btn, .primary, .floating-add-btn, .save-btn, .submit-btn, .danger, .secondary');
-    buttons.forEach(btn => {
-      if (btn.classList.contains('primary') || btn.classList.contains('save-btn') || btn.classList.contains('submit-btn') || btn.classList.contains('floating-add-btn')) {
-        btn.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
-      } else if (btn.classList.contains('secondary')) {
-        btn.style.background = secondary;
-        btn.style.color = primary;
-      } else if (btn.classList.contains('danger')) {
-        // Keep danger red
-      }
-    });
-    
-    // Update form containers
-    const containers = document.querySelectorAll('.form-container, .modal-box');
-    containers.forEach(container => {
-      container.style.background = 'rgba(255, 255, 255, 0.95)';
-    });
   };
 
   const saveTheme = async () => {
@@ -171,15 +166,15 @@ export default function ChangeTheme() {
             <span className="admin-brand-name">PatientTalkback</span>
           </div>
         </div>
-        <div className="admin-nav-right">
+        {/* <div className="admin-nav-right">
           <div className="admin-hospital-avatar-placeholder">H</div>
-        </div>
+        </div> */}
       </nav>
 
       <div className="admin-content">
         <div className="admin-page-header">
           <div className="admin-header-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20"/><path d="M2 12h20"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a10 10 0 0 0 0 20" /><path d="M2 12h20" /></svg>
             Customization
           </div>
           <h1 className="admin-page-title">🎨 Theme Settings</h1>
@@ -202,7 +197,7 @@ export default function ChangeTheme() {
                 <h3>Choose a Theme Options</h3>
                 <div className="preset-grid">
                   {PRESET_THEMES.map((preset, idx) => (
-                    <div 
+                    <div
                       key={idx}
                       className={`preset-card ${colors.primaryColor === preset.primary && colors.secondaryColor === preset.secondary ? 'active' : ''}`}
                       onClick={() => {

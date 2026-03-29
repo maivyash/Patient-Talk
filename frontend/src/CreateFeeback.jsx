@@ -32,7 +32,7 @@ export default function CreateFeedback() {
   };
 
   const handleSubmit = async () => {
-    if (!department || questions.length === 0 || questions.some(q => !q.text.trim())||!image) {
+    if (!department || questions.length === 0 || questions.some(q => !q.text.trim()) || !image) {
       alert("Department name, logo and at least one question required");
       return;
     }
@@ -49,19 +49,19 @@ export default function CreateFeedback() {
         questions,
       }),
     });
-    if (res.status === 412 ) {
+    if (res.status === 412) {
       alert("Session expired. Please log in again.");
       navigate("/login", { replace: true });
       return;
     }
-    
+
 
     const data = await res.json();
     setLoading(false);
-    if (res.status === 401 ) {
-          alert(`ERROR:${data.message || "Unauthorized" }`);
-          return
-        }
+    if (res.status === 401) {
+      alert(`ERROR:${data.message || "Unauthorized"}`);
+      return
+    }
 
 
     if (data.success) {
@@ -101,7 +101,7 @@ export default function CreateFeedback() {
       <div className="admin-content admin-content--narrow">
         <div className="admin-page-header">
           <div className="admin-header-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
             New Form
           </div>
           <h1 className="admin-page-title">Create Feedback</h1>

@@ -35,6 +35,12 @@ function App() {
   useEffect(() => {
     // Load theme on app start
     const loadTheme = async () => {
+      const hasCookie = document.cookie && document.cookie.length > 0;
+
+      if (!hasCookie) {
+
+        return;
+      }
       try {
         const res = await fetch(`${BACKENDURL}/api/admin/hospital/profile`, {
           credentials: "include",
@@ -43,11 +49,35 @@ function App() {
         if (data.success) {
           const primary = data.data.adminColor || "#1c6e73";
           const secondary = data.data.userColor || "#9ed6df";
-          
+
+          const getContrastColor = (hex) => {
+            if (!hex) return "#ffffff";
+            const color = hex.replace("#", "");
+            const r = parseInt(color.substring(0, 2), 16);
+            const g = parseInt(color.substring(2, 4), 16);
+            const b = parseInt(color.substring(4, 6), 16);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 128 ? "#0b1c28" : "#ffffff";
+          };
+
+          const contrastText = getContrastColor(secondary);
+          const btnText = getContrastColor(primary);
+          const isDark = contrastText === "#ffffff";
+
           // Apply theme to CSS custom properties
-          document.documentElement.style.setProperty('--primary-color', primary);
-          document.documentElement.style.setProperty('--secondary-color', secondary);
-          
+          document.documentElement.style.setProperty("--primary-color", primary);
+          document.documentElement.style.setProperty("--secondary-color", secondary);
+          document.documentElement.style.setProperty("--text-main", contrastText);
+          document.documentElement.style.setProperty("--btn-text", btnText);
+          document.documentElement.style.setProperty(
+            "--glass-bg",
+            isDark ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.75)"
+          );
+          document.documentElement.style.setProperty(
+            "--glass-border",
+            isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.8)"
+          );
+
           // Update body background
           document.body.style.background = secondary;
         }
@@ -64,24 +94,24 @@ function App() {
         <Route path="/" element={<Home />} />
         {/* <Route path="/hospital/:hospitalId" element={<HospitalLanding />} />
         <Route path="/hospital/:hospitalId/feedback" element={<FeedbackForm />} />
-        <Route path="/super-admin/login" element={<SuperAdminLogin />} />
-        
+        <Route path="/super-admin/login" element={<SuperAdminLogin />} /> */}
+
         <Route path="/super-admin/hospital/:hospitalId/complaints" element={<SuperAdminComplaintBoard />} />
-        <Route path="/super-admin/hospital/:hospitalId/complaints/:categoryId" element={<SuperAdminComplaintList />} /> */}
+        <Route path="/super-admin/hospital/:hospitalId/form/:formId" element={<SuperAdminComplaintList />} />
         <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
         <Route path="/login" element={<AdminLogin />} />
         {/* <Route path="/hospital/login" element={<HospitalLogin />} /> */}
         {/* <Route path="/user/login" element={<UserLogin />} /> */}
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/createFeedback" element={<CreateFeedback/>}/>
+        <Route path="/admin/createFeedback" element={<CreateFeedback />} />
         <Route path="/feedback/:id" element={<PublicFeedbackForm />} />
-        <Route path="/user/HomeforFeedback/:hospitalId" element={<PublicFeedbackHome/>} />
+        <Route path="/user/HomeforFeedback/:hospitalId" element={<PublicFeedbackHome />} />
         <Route path='admin/feedback/edit/:id' element={<EditFeedback />} />
         <Route path="/admin/assignperson" element={<AdminAssignPage />} />
         <Route path='mailPerson/getFeedbackResponsesByToken/:token' element={<SecureFeedbackView />} />
-        <Route path='/admin/changeHospitaltheme' element={<ChangeTheme/>}/>
-         {/*<Route path="/complaints" element={<ComplaintBoard />} />
+        <Route path='/admin/changeHospitaltheme' element={<ChangeTheme />} />
+        {/*<Route path="/complaints" element={<ComplaintBoard />} />
         <Route path="/complaints/new" element={<ComplaintBuilder />} />
         <Route path="/complaints/:categoryId" element={<ComplaintForm />} />
         <Route path="/complaints/:categoryId/view/:complaintId" element={<ComplaintView />} />

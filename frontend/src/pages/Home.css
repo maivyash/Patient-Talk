@@ -6,7 +6,7 @@
   padding: 24px;
   position: relative;
   overflow: hidden;
-  background: var(--secondary-color);
+  background: #9ed6df !important;
   z-index: 1;
 }
 
