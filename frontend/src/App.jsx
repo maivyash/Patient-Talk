@@ -33,59 +33,7 @@ const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 function App() {
   useEffect(() => {
-    // Load theme on app start
-    const loadTheme = async () => {
-      const hasCookie = document.cookie && document.cookie.length > 0;
-
-      if (!hasCookie) {
-
-        return;
-      }
-      try {
-        const res = await fetch(`${BACKENDURL}/api/admin/hospital/profile`, {
-          credentials: "include",
-        });
-        const data = await res.json();
-        if (data.success) {
-          const primary = data.data.adminColor || "#1c6e73";
-          const secondary = data.data.userColor || "#9ed6df";
-
-          const getContrastColor = (hex) => {
-            if (!hex) return "#ffffff";
-            const color = hex.replace("#", "");
-            const r = parseInt(color.substring(0, 2), 16);
-            const g = parseInt(color.substring(2, 4), 16);
-            const b = parseInt(color.substring(4, 6), 16);
-            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-            return brightness > 128 ? "#0b1c28" : "#ffffff";
-          };
-
-          const contrastText = getContrastColor(secondary);
-          const btnText = getContrastColor(primary);
-          const isDark = contrastText === "#ffffff";
-
-          // Apply theme to CSS custom properties
-          document.documentElement.style.setProperty("--primary-color", primary);
-          document.documentElement.style.setProperty("--secondary-color", secondary);
-          document.documentElement.style.setProperty("--text-main", contrastText);
-          document.documentElement.style.setProperty("--btn-text", btnText);
-          document.documentElement.style.setProperty(
-            "--glass-bg",
-            isDark ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.75)"
-          );
-          document.documentElement.style.setProperty(
-            "--glass-border",
-            isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.8)"
-          );
-
-          // Update body background
-          document.body.style.background = secondary;
-        }
-      } catch (err) {
-        console.log("Theme not loaded (user not authenticated)");
-      }
-    };
-    loadTheme();
+    // Theme is now loaded from localStorage in main.jsx for instant rendering
   }, []);
 
   return (

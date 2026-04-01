@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./AdminThemeSettings.css";
 import "./AdminLayout.css";
+import { applyTheme } from "../themeUtils";
 
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
@@ -51,16 +52,6 @@ export default function ChangeTheme() {
     loadCurrentTheme();
   }, []);
 
-  const getContrastColor = (hex) => {
-    if (!hex) return "#ffffff";
-    const color = hex.replace("#", "");
-    const r = parseInt(color.substring(0, 2), 16);
-    const g = parseInt(color.substring(2, 4), 16);
-    const b = parseInt(color.substring(4, 6), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? "#0b1c28" : "#ffffff";
-  };
-
   const handleChange = (key, value) => {
     const newColors = {
       ...colors,
@@ -70,30 +61,6 @@ export default function ChangeTheme() {
     // Apply changes immediately for preview
     applyTheme(newColors.primaryColor, newColors.secondaryColor);
   };
-
-  const applyTheme = (primary, secondary) => {
-    const contrastText = getContrastColor(secondary);
-    const btnText = getContrastColor(primary);
-    const isDark = contrastText === "#ffffff";
-
-    // Apply theme to CSS custom properties
-    document.documentElement.style.setProperty("--primary-color", primary);
-    document.documentElement.style.setProperty("--secondary-color", secondary);
-    document.documentElement.style.setProperty("--text-main", contrastText);
-    document.documentElement.style.setProperty("--btn-text", btnText);
-    document.documentElement.style.setProperty(
-      "--glass-bg",
-      isDark ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.75)"
-    );
-    document.documentElement.style.setProperty(
-      "--glass-border",
-      isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.8)"
-    );
-
-    // Update body background
-    document.body.style.background = secondary;
-  };
-
   const saveTheme = async () => {
     setSaving(true);
     try {
