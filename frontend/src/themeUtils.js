@@ -1,4 +1,7 @@
-export const applyTheme = (primary, secondary) => {
+export const DEFAULT_PRIMARY = "#1c6e73";
+export const DEFAULT_SECONDARY = "#9ed6df";
+
+export const applyTheme = (primary, secondary, saveToStorage = true) => {
   if (!primary || !secondary) return;
 
   const getContrastColor = (hex) => {
@@ -29,8 +32,14 @@ export const applyTheme = (primary, secondary) => {
   );
   document.body.style.background = secondary;
 
-  localStorage.setItem("hospitalAdminColor", primary);
-  localStorage.setItem("hospitalUserColor", secondary);
+  if (saveToStorage) {
+    localStorage.setItem("hospitalAdminColor", primary);
+    localStorage.setItem("hospitalUserColor", secondary);
+  }
+};
+
+export const resetToDefaultTheme = () => {
+  applyTheme(DEFAULT_PRIMARY, DEFAULT_SECONDARY, false);
 };
 
 export const loadThemeFromStorage = () => {
@@ -38,5 +47,7 @@ export const loadThemeFromStorage = () => {
   const secondary = localStorage.getItem("hospitalUserColor");
   if (primary && secondary) {
     applyTheme(primary, secondary);
+  } else {
+    resetToDefaultTheme();
   }
 };

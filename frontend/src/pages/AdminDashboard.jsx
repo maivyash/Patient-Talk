@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import "./AdminFeedback.css";
 import "./AdminLayout.css";
 import { useNavigate } from "react-router-dom";
+import { useDialog } from "../components/DialogProvider";
+import { resetToDefaultTheme } from "../themeUtils";
 const editIcon = "../src/assets/editIcon.png";
 const placeholder = "../src/assets/placeholder.jpg";
 
@@ -9,6 +11,7 @@ const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { showDialog } = useDialog();
 
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,7 @@ export default function AdminDashboard() {
       // Clear frontend-only storage
       localStorage.clear();
       sessionStorage.clear();
+      resetToDefaultTheme();
 
       navigate("/login", { replace: true });
 
@@ -87,8 +91,9 @@ export default function AdminDashboard() {
           return;
         }
         if (res.status === 412 || res.status === 401) {
-          alert("Session expired. Please log in again.");
-          navigate("/login", { replace: true });
+          showDialog("Session expired. Please log in again.", () => {
+            navigate("/login", { replace: true });
+          });
           return;
         }
 
@@ -117,14 +122,15 @@ export default function AdminDashboard() {
 
     });
     if (res.status === 412 || res.status === 401) {
-      alert("Session expired. Please log in again.");
-      navigate("/login", { replace: true });
+      showDialog("Session expired. Please log in again.", () => {
+        navigate("/login", { replace: true });
+      });
       return;
     }
     if (res.status === 200) {
       setEditingName(false);
     } else {
-      alert("Failed to update hospital name");
+      showDialog("Failed to update hospital name");
     }
   };
 
@@ -167,9 +173,18 @@ export default function AdminDashboard() {
         <>
           <div className="admin-menu-overlay" onClick={() => setMenuOpen(false)} />
           <div className="admin-menu-dialog">
-            <button onClick={() => { navigate("/admin/assignperson"); setMenuOpen(false); }}>👤 Contact Person</button>
-            <button onClick={() => { navigate("/admin/changeHospitaltheme"); setMenuOpen(false); }}>🎨 Theme Change</button>
-            <button className="admin-danger-btn" onClick={handleLogout}>🚪 Logout</button>
+            <button onClick={() => { navigate("/admin/assignperson"); setMenuOpen(false); }} style={{display: 'flex', alignItems: 'center'}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px'}}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Contact Person
+            </button>
+            <button onClick={() => { navigate("/admin/changeHospitaltheme"); setMenuOpen(false); }} style={{display: 'flex', alignItems: 'center'}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px'}}><path d="M12 21a9 9 0 0 1-8.6-6.1C3 13.6 4.3 12 6 12h2.5c.8 0 1.5.7 1.5 1.5v1a1.5 1.5 0 0 0 1.5 1.5h1a6 6 0 0 0 6-6C18.5 6 15.6 3 12 3a9 9 0 1 0 0 18z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="7" r="1.5" fill="currentColor"/><circle cx="16" cy="10" r="1.5" fill="currentColor"/></svg>
+              Theme Change
+            </button>
+            <button className="admin-danger-btn" onClick={handleLogout} style={{display: 'flex', alignItems: 'center'}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px'}}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Logout
+            </button>
           </div>
         </>
       )}

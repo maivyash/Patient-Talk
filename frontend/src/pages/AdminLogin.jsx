@@ -2,11 +2,16 @@ import React, { useState } from "react";
 import "./Admin_Login.css";
 import "./AdminLayout.css";
 import { replace, useNavigate } from "react-router-dom";
+import { resetToDefaultTheme } from "../themeUtils";
 
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 export default function Login() {
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    resetToDefaultTheme();
+  }, []);
 
   const [form, setForm] = useState({
     hospital_email: "",

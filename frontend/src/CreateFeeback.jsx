@@ -2,23 +2,34 @@ import React, { useState } from "react";
 import "./CreateFeedback.css";
 import "./pages/AdminLayout.css";
 import { useNavigate } from "react-router-dom";
+import { useDialog } from "./components/DialogProvider";
 
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 export default function CreateFeedback() {
   const navigate = useNavigate();
+  const { showDialog } = useDialog();
 
   const [department, setDepartment] = useState("");
   const [image, setImage] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [questionText, setQuestionText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleImage = (e) => {
     const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onloadend = () => setImage(reader.result);
-    reader.readAsDataURL(file);
+    if (file) {
+      if (file.size > 3 * 1024 * 1024) {
+        setErrors((prev) => ({ ...prev, image: "Image size must be less than 3MB" }));
+        e.target.value = "";
+        return;
+      }
+      setErrors((prev) => ({ ...prev, image: "" }));
+      const reader = new FileReader();
+      reader.onloadend = () => setImage(reader.result);
+      reader.readAsDataURL(file);
+    }
   };
 
   const addQuestion = () => {
@@ -32,11 +43,24 @@ export default function CreateFeedback() {
   };
 
   const handleSubmit = async () => {
-    if (!department || questions.length === 0 || questions.some(q => !q.text.trim()) || !image) {
-      alert("Department name, logo and at least one question required");
+    const newErrors = {};
+
+    if (!department.trim()) {
+      newErrors.department = "Department name is required";
+    } else if (!/^[A-Za-z\s]+$/.test(department)) {
+      newErrors.department = "Department name must contain only letters";
+    }
+
+    if (!image) {
+      newErrors.image = "Hospital logo is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
+    setErrors({});
     setLoading(true);
 
     const res = await fetch(`${BACKENDURL}/api/admin/hospital/createFeedback`, {
@@ -50,8 +74,9 @@ export default function CreateFeedback() {
       }),
     });
     if (res.status === 412) {
-      alert("Session expired. Please log in again.");
-      navigate("/login", { replace: true });
+      showDialog("Session expired. Please log in again.", () => {
+        navigate("/login", { replace: true });
+      });
       return;
     }
 
@@ -59,17 +84,15 @@ export default function CreateFeedback() {
     const data = await res.json();
     setLoading(false);
     if (res.status === 401) {
-      alert(`ERROR:${data.message || "Unauthorized"}`);
-      return
+      setErrors({ global: `ERROR: ${data.message || "Unauthorized"}` });
+      return;
     }
 
 
     if (data.success) {
-      alert("Feedback created");
       navigate("/admin/dashboard");
     } else {
-      alert(data.message || "Failed");
-
+      setErrors({ global: data.message || "Failed to create feedback" });
     }
   };
 
@@ -109,15 +132,26 @@ export default function CreateFeedback() {
         </div>
 
         <div className="form-container">
+          {errors.global && <div style={{color: '#ef4444', fontSize: '14px', fontWeight: '600', textAlign: 'center', marginBottom: '16px', padding: '12px', background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '8px'}}>{errors.global}</div>}
+
           <div className="form-group">
             <label htmlFor="department">Department Name</label>
-            <input id="department" className="input" placeholder="Enter department name" value={department} onChange={(e) => setDepartment(e.target.value)} />
+            <input 
+              id="department" 
+              className="input" 
+              placeholder="Enter department name" 
+              value={department} 
+              onChange={(e) => { setDepartment(e.target.value); setErrors((prev) => ({ ...prev, department: "" })) }} 
+              style={errors.department ? { borderColor: '#ef4444' } : {}}
+            />
+            {errors.department && <span style={{color: '#ef4444', fontSize: '12px', fontWeight: '600', marginTop: '4px', display: 'block'}}>{errors.department}</span>}
           </div>
 
           <div className="form-group">
             <label>Logo Image</label>
-            <label className="upload-btn">Select Image<input type="file" accept="image/*" onChange={handleImage} /></label>
-            {image && (<div className="image-preview"><img src={image} alt="Preview" /></div>)}
+            <label className="upload-btn" style={errors.image ? { borderColor: '#ef4444', color: '#ef4444' } : {}}>Select Image<input type="file" accept="image/*" onChange={handleImage} /></label>
+            {errors.image && <span style={{color: '#ef4444', fontSize: '12px', fontWeight: '600', marginTop: '4px', display: 'block'}}>{errors.image}</span>}
+            {image && !errors.image && (<div className="image-preview"><img src={image} alt="Preview" /></div>)}
           </div>
 
           <div className="question-section">

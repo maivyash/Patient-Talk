@@ -165,7 +165,8 @@ async function getFeedbackResponseByToken(req, res) {
             accessToken: token,
             isDeleted: false,
             tokenExpiresAt: { $gt: new Date() }, // check token validity
-        });
+        }).populate("hospitalId", "adminColor userColor hospital_name hospital_logo")
+          .populate("feedbackId", "feedback_name questions");
 
         if (!response) {
             return res.status(410).json({

@@ -7,10 +7,14 @@ const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 import { loadThemeFromStorage } from './themeUtils.js';
 
+import { DialogProvider } from './components/DialogProvider.jsx';
+
 // 🔥 LOAD THEME FROM STORAGE BEFORE REACT
 loadThemeFromStorage();
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-    <App />
+    <DialogProvider>
+      <App />
+    </DialogProvider>
   </BrowserRouter>
 );

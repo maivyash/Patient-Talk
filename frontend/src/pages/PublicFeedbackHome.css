@@ -6,7 +6,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #9ed6df !important;
+  background-color: var(--secondary-color, #9ed6df) !important;
   position: relative;
   overflow: hidden;
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./PublicFeedbackHome.css";
+import { applyTheme, loadThemeFromStorage } from "../themeUtils";
 
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
@@ -12,6 +13,11 @@ export default function PublicFeedbackHome() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Instant load theme from storage to avoid flash
+  useEffect(() => {
+    loadThemeFromStorage();
+  }, []);
+
   // Load hospital info
   useEffect(() => {
     fetch(`${BACKENDURL}/api/user/getHospitalProfileForUser/${hospitalId}`)
@@ -22,7 +28,7 @@ export default function PublicFeedbackHome() {
           // Apply hospital-specific theme
           const primary = data.data.adminColor || "#1c6e73";
           const secondary = data.data.userColor || "#9ed6df";
-          import("../themeUtils").then(m => m.applyTheme(primary, secondary));
+          applyTheme(primary, secondary);
         }
       });
   }, [hospitalId]);

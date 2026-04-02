@@ -5,20 +5,22 @@ import "./PublicFeedback.css";
 import useImageCapture from "../components/imageCapruturer";
 import useAudioRecorder from "../components/AudioRecorder";
 import useVideoRecorder from "../components/VideoRecorder";
-
+import { applyTheme, loadThemeFromStorage } from "../themeUtils";
+import { useDialog } from "../components/DialogProvider";
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 // ─── Answer type options ───
 const ANSWER_TYPES = [
-  { value: "text", label: "Text", icon: "✏️" },
-  { value: "rating", label: "Rating", icon: "⭐" },
-  { value: "image", label: "Image", icon: "📷" },
-  { value: "audio", label: "Audio", icon: "🎙️" },
-  { value: "video", label: "Video", icon: "🎥" },
+  { value: "text", label: "Text", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg> },
+  { value: "rating", label: "Rating", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg> },
+  { value: "image", label: "Image", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg> },
+  { value: "audio", label: "Audio", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg> },
+  { value: "video", label: "Video", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg> },
 ];
 
 // ─── QuestionAnswer Component ───
 function QuestionAnswer({ question, index, onAnswerChange, answer }) {
+  const { showDialog } = useDialog();
   const image = useImageCapture();
   const audio = useAudioRecorder();
   const video = useVideoRecorder();
@@ -72,7 +74,7 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
           });
         } else {
           console.error("Video blob is empty or invalid");
-          alert("Video recording failed. The recorded video appears to be empty. Please try again.");
+          showDialog("Video recording failed. The recorded video appears to be empty. Please try again.");
         }
       }, 100);
       return () => clearTimeout(timer);
@@ -109,7 +111,7 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
       image.stop();
       onAnswerChange(question._id, { answerType: "image", file: blob });
     } catch (err) {
-      alert("Camera not ready yet. Please open camera first.");
+      showDialog("Camera not ready yet. Please open camera first.");
     }
   };
 
@@ -165,6 +167,12 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
         ))}
       </div>
 
+      {currentType === "" && (
+        <div style={{ color: '#64748B', fontSize: '14px', marginTop: '12px', fontStyle: 'italic' }}>
+          Please select format of your answer
+        </div>
+      )}
+
       {/* ── TEXT ── */}
       {currentType === "text" && (
         <textarea
@@ -196,13 +204,14 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
                   })
                 }
               >
-                ⭐
+                <svg width="22" height="22" viewBox="0 0 24 24" fill={answer?.ratingValue >= val ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
               </span>
             ))}
           </div>
           {answer?.ratingValue && (
             <span className="pfb-rating-label">
-              ⭐ {answer.ratingValue} star{answer.ratingValue > 1 ? "s" : ""} selected
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" style={{ marginRight: '4px' }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+              {answer.ratingValue} star{answer.ratingValue > 1 ? "s" : ""} selected
             </span>
           )}
         </div>
@@ -218,14 +227,16 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
               </div>
               <div className="pfb-controls">
                 <button className="pfb-ctrl-btn primary" onClick={image.start}>
-                  📷 Open Camera
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                  Open Camera
                 </button>
                 <button
                   className="pfb-ctrl-btn primary"
                   onClick={handleImageCapture}
                   disabled={!image.videoRef.current?.srcObject}
                 >
-                  📸 Capture
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /></svg>
+                  Capture
                 </button>
               </div>
             </>
@@ -236,7 +247,8 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
               </div>
               <div className="pfb-controls">
                 <button className="pfb-ctrl-btn secondary" onClick={handleRetake}>
-                  🔄 Retake
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><polyline points="1 4 1 10 7 10" /><polyline points="23 20 23 14 17 14" /><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" /></svg>
+                  Retake
                 </button>
               </div>
             </>
@@ -262,11 +274,13 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
               <div className="pfb-controls">
                 {!audio.recording ? (
                   <button className="pfb-ctrl-btn primary" onClick={audio.startAudio}>
-                    🎙️ Start Recording
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg>
+                    Start Recording
                   </button>
                 ) : (
                   <button className="pfb-ctrl-btn stop" onClick={handleAudioStop}>
-                    ⏹️ Stop Recording
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /></svg>
+                    Stop Recording
                   </button>
                 )}
               </div>
@@ -278,7 +292,8 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
               </div>
               <div className="pfb-controls">
                 <button className="pfb-ctrl-btn secondary" onClick={handleRetake}>
-                  🔄 Re-record
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><polyline points="1 4 1 10 7 10" /><polyline points="23 20 23 14 17 14" /><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" /></svg>
+                  Re-record
                 </button>
               </div>
             </>
@@ -305,11 +320,13 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
               <div className="pfb-controls">
                 {!video.recording ? (
                   <button className="pfb-ctrl-btn primary" onClick={video.startRecording}>
-                    🎥 Start Recording
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg>
+                    Start Recording
                   </button>
                 ) : (
                   <button className="pfb-ctrl-btn stop" onClick={handleVideoStop}>
-                    ⏹️ Stop Recording
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /></svg>
+                    Stop Recording
                   </button>
                 )}
               </div>
@@ -326,13 +343,14 @@ function QuestionAnswer({ question, index, onAnswerChange, answer }) {
                   onLoadedMetadata={(e) => console.log("Video loaded, duration:", e.target.duration)}
                   onError={(e) => {
                     console.error("Video playback error:", e);
-                    alert("Error playing video. The file may be corrupted.");
+                    showDialog("Error playing video. The file may be corrupted.");
                   }}
                 />
               </div>
               <div className="pfb-controls">
                 <button className="pfb-ctrl-btn secondary" onClick={handleRetake}>
-                  🔄 Re-record
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><polyline points="1 4 1 10 7 10" /><polyline points="23 20 23 14 17 14" /><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" /></svg>
+                  Re-record
                 </button>
               </div>
             </>
@@ -352,6 +370,13 @@ export default function FeedbackResponse() {
   const [feedback, setFeedback] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const { showDialog } = useDialog();
+
+  // Instant load theme on mount
+  useEffect(() => {
+    loadThemeFromStorage();
+  }, []);
 
   // Load feedback form
   useEffect(() => {
@@ -366,41 +391,20 @@ export default function FeedbackResponse() {
   }, [id]);
 
 
-  useEffect(() => {
-    if (!feedback?.hospitalId) return;
-    fetch(`${BACKENDURL}/api/user/getHospitalProfileForUser/${feedback.hospitalId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          const primary = data.data.adminColor;
-          const secondary = data.data.userColor;
-          document.documentElement.style.setProperty('--primary-color', primary);
-          document.documentElement.style.setProperty('--secondary-color', secondary);
-
-          console.log("PRIMARY:", primary);
-          console.log("SECONDARY:", secondary);
-        }
-
-
-      });
-  }, [feedback?.hospitalId]);
-
-
-
-
   // Load hospital-specific theme
   useEffect(() => {
     const loadHospitalTheme = async () => {
-
       if (!feedback?.hospitalId) return;
-      const res = await fetch(`${BACKENDURL}/api/user/getHospitalProfileForUser/${feedback?.hospitalId}`, {
-
-      });
-      const data = await res.json();
-      if (data.success) {
-        const primary = data.data.adminColor || "#1c6e73";
-        const secondary = data.data.userColor || "#9ed6df";
-        import("../themeUtils").then(m => m.applyTheme(primary, secondary));
+      try {
+        const res = await fetch(`${BACKENDURL}/api/user/getHospitalProfileForUser/${feedback.hospitalId}`);
+        const data = await res.json();
+        if (data.success) {
+          const primary = data.data.adminColor || "#1c6e73";
+          const secondary = data.data.userColor || "#9ed6df";
+          applyTheme(primary, secondary);
+        }
+      } catch (err) {
+        console.error("Failed to load hospital theme:", err);
       }
     };
     loadHospitalTheme();
@@ -460,10 +464,11 @@ export default function FeedbackResponse() {
     }
 
     if (responses.length === 0) {
-      alert("Please answer at least one question before submitting.");
+      setSubmitError("Minimum 1 question feedback required. Please select the format of your answer and provide feedback.");
       return;
     }
 
+    setSubmitError("");
     formData.append("responses", JSON.stringify(responses));
 
     try {
@@ -475,16 +480,17 @@ export default function FeedbackResponse() {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        alert(result.message || "Submission failed. Please try again.");
+        setSubmitError(result.message || "Submission failed. Please try again.");
         setLoading(false);
         return;
       }
 
       setAnswers({});
-      alert("Thank you for your feedback!");
-      navigate(`/user/HomeforFeedback/${feedback.hospitalId}`, { replace: true });
+      showDialog("Thank you for your feedback!", () => {
+        navigate(`/user/HomeforFeedback/${feedback.hospitalId}`, { replace: true });
+      });
     } catch (err) {
-      alert("Network error. Please try again.");
+      showDialog("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -592,6 +598,11 @@ export default function FeedbackResponse() {
 
         {/* ─── Submit ─── */}
         <div className="pfb-submit-area">
+          {submitError && (
+            <div style={{ color: '#ef4444', background: '#fef2f2', border: '1px solid #fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', fontWeight: 'bold', textAlign: 'center' }}>
+              {submitError}
+            </div>
+          )}
           <button className="pfb-submit-btn" onClick={submitFeedback}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="22" y1="2" x2="11" y2="13" />

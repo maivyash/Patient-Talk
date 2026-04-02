@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "./Register.css";
 import "./AdminLayout.css";
 import { useNavigate } from "react-router-dom";
+import { resetToDefaultTheme } from "../themeUtils";
+import { useDialog } from "../components/DialogProvider";
 import Select from "react-select";
 import { usCities } from "../components/usCities";
 
@@ -9,6 +11,11 @@ const BACKENDURL = import.meta.env.VITE_BACKENDURL;
 
 export default function AdminRegister() {
   const navigate = useNavigate();
+  const { showDialog } = useDialog();
+
+  React.useEffect(() => {
+    resetToDefaultTheme();
+  }, []);
 
   const [form, setForm] = useState({
     hospital_name: "",
@@ -31,23 +38,28 @@ export default function AdminRegister() {
 
     if (!form.hospital_name.trim()) {
       newErrors.hospital_name = "Hospital name is required";
+    } else if (!/^[a-zA-Z\s]+$/.test(form.hospital_name)) {
+      newErrors.hospital_name = "Name must contain only letters and spaces";
     }
 
     if (!emailRegex.test(form.hospital_email)) {
-      newErrors.hospital_email = "Invalid email format";
+      newErrors.hospital_email = "Please enter a valid email format";
     }
 
     if (form.hospital_password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+      newErrors.hospital_password = "Password is minimum 8 digit";
     }
 
     if (!usPhoneRegex.test(form.hospital_phno)) {
-      newErrors.hospital_phno = "Enter a valid US phone number";
+      newErrors.hospital_phno = "Enter a valid US phone number format";
     }
 
     if (!form.hospital_logo) {
       newErrors.hospital_logo = "Hospital logo is required";
+    } else if (form.hospital_logo.size > 3 * 1024 * 1024) {
+      newErrors.hospital_logo = "Hospital logo maximum size is 3MB";
     }
+
     if (!form.location) {
       newErrors.location = "Hospital location is required";
     }
@@ -124,34 +136,25 @@ export default function AdminRegister() {
         body: JSON.stringify(payload),
       });
       if (res.status === 409) {
-        alert("Email already exists!");
-        throw new Error("Email already exists");
-        return
-
-          ;
-
+        setErrors({ global: "Email already exists!" });
+        return;
       }
       if (res.status === 401) {
-        alert("Invalid input data!" + res.message);
-        throw new Error("Invalid input data");
-
+        setErrors({ global: "Invalid input data!" });
         return;
       }
       if (!res.ok) {
-        throw new Error("Registration failed")
-        alert("Registration failed!")
+        setErrors({ global: "Registration failed! Please try again." });
         return;
       } else {
-        alert("Registration successful!");
-        navigate("/admin/login", { replace: true });
+        showDialog("Registration successful!", () => {
+          navigate("/admin/login", { replace: true });
+        });
       }
 
-
     } catch (err) {
-      alert(err.message);
+      setErrors({ global: "Network block or server error. Please try again later." });
     }
-
-
   };
 
 
@@ -215,6 +218,8 @@ export default function AdminRegister() {
             <label>Hospital Location (USA)</label>
             <Select className="pt-select" classNamePrefix="pt-select" options={usCities} placeholder="Select city" value={form.location} onChange={(selected) => setForm({ ...form, location: selected })} menuPlacement="top" menuPortalTarget={document.body} styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }} />
             {errors.location && <p className="error">{errors.location}</p>}
+
+            {errors.global && <p className="error global-error">{errors.global}</p>}
 
             <button className="login-btn" type="submit">Register</button>
           </form>

@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
-
+import { useDialog } from "./DialogProvider";
 
 export default function useVideoRecorder() {
+  const { showDialog } = useDialog();
   const [recording, setRecording] = useState(false);
   const [videoBlob, setVideoBlob] = useState(null);
   const videoRef = useRef();
@@ -90,7 +91,7 @@ export default function useVideoRecorder() {
       setRecording(true);
     } catch (error) {
       console.error("Error starting video recording:", error);
-      alert("Failed to access camera/microphone. Please check permissions.");
+      showDialog("Failed to access camera/microphone. Please check permissions.");
     }
   };
 

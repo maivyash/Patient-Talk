@@ -116,8 +116,21 @@
 
 /* Error text spacing above button */
 .register-card .error {
-  margin-top: 4px;
+  margin-top: -10px;
   margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ef4444; /* Clean medical red */
+  text-align: left;
+}
+
+.register-card .error.global-error {
+  text-align: center;
+  background: #fef2f2;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #fee2e2;
+  margin-top: 10px;
 }
 
 /* React Select styling for city dropdown */
