@@ -11,7 +11,34 @@ export default function Login() {
 
   React.useEffect(() => {
     resetToDefaultTheme();
-  }, []);
+    
+    // Check if user already has valid authentication cookie
+    const checkAuthStatus = async () => {
+      try {
+        // Try to verify token by making an authenticated request
+        const res = await fetch(`${BACKENDURL}/api/auth/verify`, {
+          method: "GET",
+          credentials: "include", // Include cookies
+        });
+        
+        if (res.status === 200) {
+          // User is already authenticated
+          const data = await res.json();
+          // Redirect based on user type
+          if (data.isSuperAdmin) {
+            navigate("/superadmin/dashboard", { replace: true });
+          } else {
+            navigate("/admin/dashboard", { replace: true });
+          }
+        }
+      } catch (err) {
+        // Not authenticated, stay on login page
+        console.log("Not authenticated");
+      }
+    };
+    
+    checkAuthStatus();
+  }, [navigate]);
 
   const [form, setForm] = useState({
     hospital_email: "",
