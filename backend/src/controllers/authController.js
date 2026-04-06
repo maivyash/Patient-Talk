@@ -229,7 +229,7 @@ async function login(req, res, next) {
     res.cookie("token", token, {
       httpOnly: true,      // 🔐 secure from XSS
       secure: true,       // ❗ localhost only (true in prod)
-      sameSite: "lax",     // works with localhost
+      sameSite: "none",     // works with localhost
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
     return res.status(200).json({
@@ -301,8 +301,8 @@ async function superadminLogin(req, res, next) {
       });
       res.cookie("token", token, {
         httpOnly: true,      // 🔐 secure from XSS
-        secure: false,       // ❗ localhost only (true in prod)
-        sameSite: "lax",     // works with localhost
+        secure: true,       // ❗ localhost only (true in prod)
+        sameSite: "none",     // works with localhost
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
       return res.status(200).json({
