@@ -33,7 +33,7 @@
 }
 
 .color-customizer h3::before {
-  content: "✨";
+  content: "";
   font-size: 22px;
 }
 
@@ -155,7 +155,7 @@
 }
 
 .preview-section-horizontal h3::before {
-  content: "👁️";
+  content: "";
   font-size: 24px;
 }
 

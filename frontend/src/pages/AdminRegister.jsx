@@ -221,7 +221,7 @@ export default function AdminRegister() {
 
             {errors.global && <p className="error global-error">{errors.global}</p>}
 
-            <button className="login-btn" type="submit">Register</button>
+            <button style={{ marginTop: '18px' }} className="login-btn" type="submit">Register</button>
           </form>
         </div>
       </div>

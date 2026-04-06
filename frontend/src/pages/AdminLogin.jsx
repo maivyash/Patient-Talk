@@ -203,6 +203,7 @@ if (!form.superAdmin) {
               </label>
 
               <span
+                style={{marginLeft:"30px"}}
                 className="register"
                 onClick={() => navigate("/admin/register")}
               >

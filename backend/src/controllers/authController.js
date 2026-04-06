@@ -282,7 +282,7 @@ async function superadminLogin(req, res, next) {
     if (!ADMIN) {
       return res.status(401).json({
         success: false,
-        message: `Invalid email or password==`,
+        message: `Invalid email or password`,
 
         //CODE IS RETUNING INI THIS IF
       });
@@ -332,12 +332,59 @@ async function logout(req, res, next) {
   });
 }
 
+async function verify(req, res, next) {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "No token found",
+      });
+    }
+
+    const decoded = require("jsonwebtoken").verify(token, process.env.JWT_SECRET);
+
+    // Check if it's a super admin
+    const superAdmin = await SUPER_ADMIN.findById(decoded.id);
+    if (superAdmin) {
+      return res.status(200).json({
+        success: true,
+        isSuperAdmin: true,
+        id: decoded.id,
+        email: decoded.email,
+      });
+    }
+
+    // Check if it's a regular hospital
+    const hospital = await HOSPITAL_DETAILS.findById(decoded.id);
+    if (hospital) {
+      return res.status(200).json({
+        success: true,
+        isSuperAdmin: false,
+        id: decoded.id,
+        email: decoded.email,
+      });
+    }
+
+    return res.status(401).json({
+      success: false,
+      message: "User not found",
+    });
+  } catch (err) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
+}
+
 
 
 module.exports = {
   signup,
   login,
   superadminLogin,
-  logout
+  logout,
+  verify
 };
 

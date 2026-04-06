@@ -1,5 +1,5 @@
 const express = require("express");
-const { signup, login, superadminLogin, logout } = require("../controllers/authController");
+const { signup, login, superadminLogin, logout, verify } = require("../controllers/authController");
 
 const router = express.Router();
 
@@ -9,6 +9,7 @@ router.post("/signup", signup);
 // Login using email and password
 router.post("/login", login);
 router.post("/logout", logout);
+router.get("/verify", verify);
 
 
 //super admin login 
