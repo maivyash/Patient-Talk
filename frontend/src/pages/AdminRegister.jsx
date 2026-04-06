@@ -161,7 +161,7 @@ export default function AdminRegister() {
   return (
     <div className="login-page">
       {/* Navbar */}
-      <nav className="admin-navbar" style={{ position: 'relative' }}>
+      <nav className="admin-navbar" style={{ position: 'absolute', top: 0, left: 0, right: 0, width: '100%', boxSizing: 'border-box' }}>
         <div className="admin-nav-left">
           <button className="admin-back-btn" onClick={() => navigate('/login')}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
@@ -183,7 +183,7 @@ export default function AdminRegister() {
         <div className="admin-nav-right"></div>
       </nav>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 20px', position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px 24px', position: 'relative', zIndex: 1 }}>
         <div style={{ width: '100%', maxWidth: '440px' }}>
           <form className="login-card" onSubmit={handleSubmit}>
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>

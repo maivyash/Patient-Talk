@@ -21,6 +21,7 @@ export default function EditFeedback() {
     const [loading, setLoading] = useState(true);
     const [selectedComplaint, setSelectedComplaint] = useState(null);
     const [visibleCount, setVisibleCount] = useState(3);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     // 🔹 Load feedback
     useEffect(() => {
@@ -109,10 +110,12 @@ export default function EditFeedback() {
         setQuestions([...questions, { text: newQuestion }]);
         setNewQuestion("");
         setQuestionError("");
+        setHasUnsavedChanges(true);
     };
 
     const removeQuestion = (index) => {
         setQuestions(questions.filter((_, i) => i !== index));
+        setHasUnsavedChanges(true);
     };
 
     const saveChanges = async () => {
@@ -139,6 +142,7 @@ export default function EditFeedback() {
         }
 
         if (res.status === 200) {
+            setHasUnsavedChanges(false);
             showDialog("Feedback updated", () => {
                 navigate("/admin/dashboard", { replace: true });
             });
@@ -321,11 +325,19 @@ export default function EditFeedback() {
                                 <input
                                     type="checkbox"
                                     checked={!isActive}
-                                    onChange={() => setIsActive(!isActive)}
+                                    onChange={() => {
+                                        setIsActive(!isActive);
+                                        setHasUnsavedChanges(true);
+                                    }}
                                     title={isActive ? "Close Form" : "Open Form"}
                                 />
                             </div>
                         </div>
+                        {hasUnsavedChanges && (
+                            <div style={{ color: '#d97706', backgroundColor: '#fef3c7', padding: '10px', borderRadius: '6px', marginBottom: '15px', textAlign: 'center', fontWeight: '500', fontSize: '14px' }}>
+                                Note: click on save button for save changes
+                            </div>
+                        )}
                         <div className="form-actions-grid">
                             <button className="save-btn-large" onClick={saveChanges}>
                                 Save Changes

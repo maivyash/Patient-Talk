@@ -9,14 +9,21 @@ const { log } = require("console");
 async function getFeedbackByIdforUser(req, res) {
     const feedback = await FEEDBACK.findOne({
         _id: req.params.id,
-        isActive: true,
         isDeleted: false,
-    }).select("+feedback_name +questions +logo_png +hospitalId +adminColor +userColor");
+    }).select("+feedback_name +questions +logo_png +hospitalId +adminColor +userColor +isActive");
 
     if (!feedback) {
         return res.status(404).json({
             success: false,
-            message: "Feedback form closed or not found",
+            message: "Feedback form not found",
+        });
+    }
+
+    if (!feedback.isActive) {
+        return res.status(404).json({
+            success: false,
+            message: "Feedback form closed",
+            hospitalId: feedback.hospitalId
         });
     }
 
