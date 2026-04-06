@@ -228,7 +228,7 @@ async function login(req, res, next) {
     });
     res.cookie("token", token, {
       httpOnly: true,      // 🔐 secure from XSS
-      secure: false,       // ❗ localhost only (true in prod)
+      secure: true,       // ❗ localhost only (true in prod)
       sameSite: "lax",     // works with localhost
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
