@@ -323,8 +323,8 @@ async function superadminLogin(req, res, next) {
 async function logout(req, res, next) {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: true,
+    sameSite: "none",
   });
   return res.status(200).json({
     success: true,
