@@ -135,9 +135,10 @@ async function signup(req, res, next) {
       hospital_name: hospital.hospital_name,
     });
     res.cookie("token", token, {
-      httpOnly: true,      // 🔐 secure from XSS
-      secure: false,       // ❗ localhost only (true in prod)
-      sameSite: "lax",     // works with localhost
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -227,9 +228,10 @@ async function login(req, res, next) {
       hospital_email: hospital.hospital_email,
     });
     res.cookie("token", token, {
-      httpOnly: true,      // 🔐 secure from XSS
-      secure: true,       // ❗ localhost only (true in prod)
-      sameSite: "none",     // works with localhost
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
     return res.status(200).json({
@@ -300,9 +302,10 @@ async function superadminLogin(req, res, next) {
         email: ADMIN.hospital_email,
       });
       res.cookie("token", token, {
-        httpOnly: true,      // 🔐 secure from XSS
-        secure: true,       // ❗ localhost only (true in prod)
-        sameSite: "none",     // works with localhost
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
       return res.status(200).json({
@@ -313,18 +316,23 @@ async function superadminLogin(req, res, next) {
     }
   } catch (err) {
     return next(err);
-  } finally {
-
-    return;
   }
-
 }
 
 async function logout(req, res, next) {
+  // Clear cookie with matching options (path is critical for cross-origin)
   res.clearCookie("token", {
     httpOnly: true,
     secure: true,
     sameSite: "none",
+    path: "/",
+  });
+  // Also clear any old cookies that may have been set with different options
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: "/",
   });
   return res.status(200).json({
     success: true,
