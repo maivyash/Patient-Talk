@@ -368,7 +368,7 @@ async function verify(req, res, next) {
 
     return res.status(401).json({
       success: false,
-      message: "User not found",
+      message: "User not found.",
     });
   } catch (err) {
     return res.status(401).json({
