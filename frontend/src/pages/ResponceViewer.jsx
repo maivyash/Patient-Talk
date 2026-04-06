@@ -44,8 +44,11 @@ export default function SecureFeedbackView() {
 
         // Apply hospital-specific theme
         if (data.data.hospitalId) {
-          const primary = data.data.hospitalId.adminColor || "#1c6e73";
-          const secondary = data.data.hospitalId.userColor || "#9ed6df";
+          const OLD_DEFAULT = "#94D8E2";
+          const rawP = data.data.hospitalId.adminColor;
+          const rawS = data.data.hospitalId.userColor;
+          const primary = (!rawP || rawP.toUpperCase() === OLD_DEFAULT) ? "#1c6e73" : rawP;
+          const secondary = (!rawS || rawS.toUpperCase() === OLD_DEFAULT) ? "#9ed6df" : rawS;
           applyTheme(primary, secondary);
         }
       } catch (err) {

@@ -412,8 +412,11 @@ export default function FeedbackResponse() {
         const res = await fetch(`${BACKENDURL}/api/user/getHospitalProfileForUser/${feedback.hospitalId}`);
         const data = await res.json();
         if (data.success) {
-          const primary = data.data.adminColor || "#1c6e73";
-          const secondary = data.data.userColor || "#9ed6df";
+          const OLD_DEFAULT = "#94D8E2";
+          const rawP = data.data.adminColor;
+          const rawS = data.data.userColor;
+          const primary = (!rawP || rawP.toUpperCase() === OLD_DEFAULT) ? "#1c6e73" : rawP;
+          const secondary = (!rawS || rawS.toUpperCase() === OLD_DEFAULT) ? "#9ed6df" : rawS;
           applyTheme(primary, secondary);
         }
       } catch (err) {

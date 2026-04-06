@@ -72,8 +72,11 @@ export default function AdminDashboard() {
         if (data.success) {
           setHospitalName(data.data.hospital_name);
           setHospitalLogo(data.data.hospital_logo);
-          const primary = data.data.adminColor || "#1c6e73";
-          const secondary = data.data.userColor || "#9ed6df";
+          const OLD_DEFAULT = "#94D8E2";
+          const rawPrimary = data.data.adminColor;
+          const rawSecondary = data.data.userColor;
+          const primary = (!rawPrimary || rawPrimary.toUpperCase() === OLD_DEFAULT) ? "#1c6e73" : rawPrimary;
+          const secondary = (!rawSecondary || rawSecondary.toUpperCase() === OLD_DEFAULT) ? "#9ed6df" : rawSecondary;
           import("../themeUtils").then(m => m.applyTheme(primary, secondary));
 
         }
