@@ -4,7 +4,7 @@ import "./AdminLayout.css";
 import { useNavigate } from "react-router-dom";
 import { useDialog } from "../components/DialogProvider";
 import { resetToDefaultTheme } from "../themeUtils";
-const editIcon = "../src/assets/editIcon.png";
+const editIcon = "/editIcon.png";
 const placeholder = "../src/assets/placeholder.jpg";
 
 const BACKENDURL = import.meta.env.VITE_BACKENDURL;
